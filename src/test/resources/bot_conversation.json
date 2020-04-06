@@ -1,0 +1,113 @@
+{
+  "states": [
+    {
+      "id": "start",
+      "type": "start"
+    },
+    {
+      "id": "ask-what-todo",
+      "type": "send-mex",
+      "message": "Ciao! Cosa vuoi fare?"
+    },
+    {
+      "id": "get-choice",
+      "type": "wait-for-input",
+      "expected-type": "string",
+      "expected-values": {
+        "type": "static",
+        "values": [
+          "Inserisci una spesa",
+          "Esci"
+        ]
+      }
+    },
+    {
+      "id": "ask-amount",
+      "type": "send-mex",
+      "message": "Quanto hai speso?"
+    },
+    {
+      "id": "get-amount",
+      "type": "wait-for-input",
+      "expected-type": "double",
+      "expected-values": {
+        "type": "any"
+      },
+      "session-field": "amount"
+    },
+    {
+      "id": "ask-category",
+      "type": "send-mex",
+      "message": "A che categoria appartiene?"
+    },
+    {
+      "id": "retrieve-categories",
+      "type": "jdbc-read",
+      "options": {},
+      "session-field": "category-list"
+    },
+    {
+      "id": "get-category",
+      "type": "wait-for-input",
+      "expected-type": "string",
+      "expected-values": {
+        "type": "session",
+        "key": "category-list"
+      },
+      "session-field": "category"
+    },
+    {
+      "id": "ask-confirm",
+      "type": "send-mex",
+      "message": "Stai inserendo:\nTotale: ${amount}\nCategoria: ${category}\n\nConfermi?"
+    },
+    {
+      "id": "get-confirm",
+      "type": "wait-for-input",
+      "expected-type": "string",
+      "expected-values": {
+        "type": "static",
+        "values": [
+          "Yes",
+          "No"
+        ]
+      }
+    },
+    {
+      "id": "send-confirm",
+      "type": "send-mex",
+      "message": "Spesa inserita"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "message": "Grazie e alla prossima!"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "get-choice",
+      "to": "ask-amount",
+      "on-input": "Inserisci una spesa"
+    },
+    {
+      "from": "get-choice",
+      "to": "end",
+      "on-input": "Esci"
+    },
+    {
+      "from": "get-confirm",
+      "to": "finalize",
+      "on-input": "No"
+    },
+    {
+      "from": "get-confirm",
+      "to": "send-confirm",
+      "on-input": "Yes"
+    },
+    {
+      "from": "send-confirm",
+      "to": "end"
+    }
+  ]
+}

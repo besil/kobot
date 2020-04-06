@@ -1,5 +1,5 @@
 # Kobot - Conversational bot
-### Conversational Configurable Bot
+
 ## Goal
 The goal of this project is to provide an open source framework 
 for creating conversational bots using only a simple descriptive

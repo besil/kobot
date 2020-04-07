@@ -84,11 +84,21 @@ Now go to telegram and enjoy your first conversation with the bot!
 
 ## Developer guide
 
-### Build
+### Build locally
 ```shell script
 git clone https://github.com/besil/kobot.git
 cd kobot
 mvn clean package
+``` 
+
+### Docker
+Put your *telegram.json* and *conversation.json* inside the **data** folder
+
+```shell script
+bash scripts/build-docker.sh
+bash scripts/run-docker.sh \
+  -config /data/conversation.json \
+  -telegram /data/telegram.json
 ``` 
 
 #### License

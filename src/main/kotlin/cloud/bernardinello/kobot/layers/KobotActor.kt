@@ -10,7 +10,7 @@ abstract class KobotActor : UntypedAbstractActor() {
         val log: Logger = LoggerFactory.getLogger(KobotActor::class.java)
     }
 
-    override fun onReceive(message: Any) {
+    final override fun onReceive(message: Any) {
         try {
             val m: Method = this.javaClass.getMethod("onReceive", message::class.java)
             m.invoke(this, message)

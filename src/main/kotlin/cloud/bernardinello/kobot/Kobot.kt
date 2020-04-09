@@ -12,6 +12,8 @@ import cloud.bernardinello.kobot.layers.conversation.ConversationEngine
 import cloud.bernardinello.kobot.layers.memory.InMemoryLayer
 import cloud.bernardinello.kobot.layers.transport.MyTelegramBot
 import cloud.bernardinello.kobot.layers.transport.TelegramTransportLayer
+import cloud.bernardinello.kobot.monitoring.MonitorActor
+import cloud.bernardinello.kobot.monitoring.StartMonitoring
 import cloud.bernardinello.kobot.utils.KobotParser
 import cloud.bernardinello.kobot.utils.LogUtils
 import com.github.ajalt.clikt.core.CliktCommand
@@ -35,22 +37,28 @@ class Kobot(val config: BotConfig) {
     val transportLayer: ActorRef
     val memoryLayer: ActorRef
     val conversationLayer: List<ActorRef>
+    val monitoringActor: ActorRef
 
     init {
-        LogUtils.setLogLevel()
+//        LogUtils.setLogLevel()
 
         log.debug("Starting actor system...")
         system = ActorSystem.create("kobot")
+        // layers
         transportLayer = system.actorOf(Props.create(TelegramTransportLayer::class.java), "transportLayer")
         memoryLayer = system.actorOf(Props.create(InMemoryLayer::class.java, config), "memoryLayer")
         conversationLayer = (0..3).map { system.actorOf(Props.create(ConversationEngine::class.java, config)) }.toList()
+        // monitoring
+        monitoringActor = system.actorOf(Props.create(MonitorActor::class.java, config), "monitoring")
     }
 
     fun start() {
-        log.trace("Init actors")
+        log.trace("Init layers")
         transportLayer.tell(AddMemoryLayer, memoryLayer)
         conversationLayer.forEach { memoryLayer.tell(AddConversationLayer, it) }
         memoryLayer.tell(AddTransportLayer, transportLayer)
+        log.trace("Init monitoring")
+        monitoringActor.tell(StartMonitoring, monitoringActor)
         log.info("Kobot is up & running")
     }
 

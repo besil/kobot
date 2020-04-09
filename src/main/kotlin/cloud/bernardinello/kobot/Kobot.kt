@@ -40,8 +40,6 @@ class Kobot(val config: BotConfig) {
     val monitoringActor: ActorRef
 
     init {
-//        LogUtils.setLogLevel()
-
         log.debug("Starting actor system...")
         system = ActorSystem.create("kobot")
         // layers

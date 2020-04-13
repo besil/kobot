@@ -7,20 +7,24 @@ and human-readable configuration
 
 ## Quickstart guide
 ### Prerequisites
-* Download or build the jar (kobot-1.0-jar-with-dependencies.jar)
+* Download or build the jar (kobot-1.0-SNAPSHOT-exec.jar)
 * Have a telegram bot token and name (talk to Botfather in order to get it)
 * Have Java 8+ installed
 
 ### Define the configuration
-Create a *telegram.json* file, containing
-```json
-{
-    "name": "<your bot name>",
-    "token": "<your bot token>"
-}
+Under the *config* dir, create two files:
+* *application.properties*
+* *conversation.json*
+
+The *config/application.properties* contains bot telegram definition and the
+relative path to the conversation json descriptor
+```properties
+bot.name=<your bot name>
+bot.token=<your bot token>
+conversation.path=config/conversation.json
 ```
 
-Create a *conversation.json* file, containing your bot conversation configuration.
+The *conversation.json* file contains your actual configuration.
 Try with this:
 
 ```json
@@ -92,13 +96,12 @@ mvn clean package
 ``` 
 
 ### Docker
-Put your *telegram.json* and *conversation.json* inside the **data** folder
+Put your *telegram.json* and *conversation.json* inside the **config** folder
 
+Then run
 ```shell script
 bash scripts/build-docker.sh
-bash scripts/run-docker.sh \
-  -config /data/conversation.json \
-  -telegram /data/telegram.json
+bash scripts/run-docker.sh
 ``` 
 
 #### License

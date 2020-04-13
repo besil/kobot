@@ -107,6 +107,6 @@ class KobotCommand : CliktCommand() {
 }
 
 
-fun main(args: Array<String>) {
-    KobotCommand().main(args)
-}
+//fun main(args: Array<String>) {
+//    KobotCommand().main(args)
+//}

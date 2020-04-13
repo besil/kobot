@@ -54,11 +54,11 @@
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.github.ajalt/clikt -->
-        <dependency>
-            <groupId>com.github.ajalt</groupId>
-            <artifactId>clikt</artifactId>
-            <version>2.6.0</version>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.ajalt</groupId>-->
+        <!--            <artifactId>clikt</artifactId>-->
+        <!--            <version>2.6.0</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.13</artifactId>

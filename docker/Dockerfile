@@ -6,17 +6,12 @@ WORKDIR /kobot
 RUN mvn clean package
 
 FROM openjdk:8
+ARG kobotv=1.0-SNAPSHOT
 RUN mkdir -p /kobot
-COPY --from=build /kobot/target/kobot-1.0-SNAPSHOT-jar-with-dependencies.jar /kobot/kobot-1.0.jar
 WORKDIR /kobot
-ENTRYPOINT ["java", "-jar", "kobot-1.0.jar" ]
-
-#FROM oracle/graalvm-ce:20.0.0
-#RUN gu install native-image
-#RUN mkdir -p /kobot
-#COPY --from=build /kobot/target/kobot-1.0-SNAPSHOT-jar-with-dependencies.jar /kobot/kobot-1.0.jar
-#WORKDIR /kobot
-
-
-
+COPY --from=build /kobot/target/kobot-$kobotv-exec.jar ./
+RUN echo "#!/bin/bash" > start.sh
+RUN echo "java -jar kobot-$kobotv-exec.jar" >> start.sh
+RUN chmod +x start.sh
+ENTRYPOINT ["./start.sh" ]
 

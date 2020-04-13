@@ -21,9 +21,9 @@ class KobotConfig {
     }
 
     @Bean
-    fun telegramConfig(@Value("\${bot.name}") botName: String, @Value("\${bot.token}") token: String): TelegramConfig {
-        log.debug("Creating a bot config: {} - {}", botName, token)
-        return TelegramConfig(botName, token)
+    fun telegramConfig(@Value("\${bot.name}") name: String, @Value("\${bot.token}") token: String): TelegramConfig {
+        log.debug("Creating a bot config: {} - {}", name, token)
+        return TelegramConfig(name, token)
     }
 
 }

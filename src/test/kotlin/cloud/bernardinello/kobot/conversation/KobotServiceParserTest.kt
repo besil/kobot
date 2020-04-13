@@ -7,7 +7,7 @@ import io.kotlintest.matchers.string.shouldContain
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 
-class KobotParserTest : StringSpec() {
+class KobotServiceParserTest : StringSpec() {
 
     init {
         LogUtils.setLogLevel(default = "info")

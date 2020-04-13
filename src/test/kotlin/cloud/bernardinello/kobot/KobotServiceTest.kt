@@ -7,6 +7,7 @@ import cloud.bernardinello.kobot.layers.memory.MemoryData
 import cloud.bernardinello.kobot.layers.memory.NoMemoryData
 import cloud.bernardinello.kobot.layers.memory.SessionData
 import cloud.bernardinello.kobot.layers.transport.MyTelegramBot
+import cloud.bernardinello.kobot.services.KobotService
 import cloud.bernardinello.kobot.utils.KobotParser
 import cloud.bernardinello.kobot.utils.LogUtils
 import io.kotlintest.TestCase
@@ -20,11 +21,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove
 
-class KobotTest : StringSpec() {
-    lateinit var kobot: Kobot
+class KobotServiceTest : StringSpec() {
+    lateinit var kobotService: KobotService
 
     companion object {
-        val log: Logger = LoggerFactory.getLogger(KobotTest::class.java)
+        val log: Logger = LoggerFactory.getLogger(KobotServiceTest::class.java)
     }
 
     override fun beforeTest(testCase: TestCase) {
@@ -42,16 +43,16 @@ class KobotTest : StringSpec() {
             |]
             |}""".trimMargin()
         )
-        kobot = Kobot(config)
+        kobotService = KobotService(config)
     }
 
     init {
         LogUtils.setLogLevel(default = "info")
 
         "simple behaviour test" {
-            kobot.transportLayer.tell(AddMemoryLayer, kobot.memoryLayer)
-            kobot.memoryLayer.tell(AddConversationLayer, kobot.conversationLayer.first())
-            kobot.memoryLayer.tell(AddTransportLayer, kobot.transportLayer)
+            kobotService.transportLayer.tell(AddMemoryLayer, kobotService.memoryLayer)
+            kobotService.memoryLayer.tell(AddConversationLayer, kobotService.conversationLayer.first())
+            kobotService.memoryLayer.tell(AddTransportLayer, kobotService.transportLayer)
 
             val update = mockk<Update>()
             every { update.message.chatId } returns 1L
@@ -62,32 +63,36 @@ class KobotTest : StringSpec() {
             mex.replyMarkup = ReplyKeyboardRemove()
             every { myBot.execute(mex) } answers { nothing }
 
-            kobot.transportLayer.tell(myBot, kobot.transportLayer)
+            kobotService.transportLayer.tell(myBot, kobotService.transportLayer)
 
-            kobot.transportLayer.tell(update, kobot.transportLayer)
+            kobotService.transportLayer.tell(update, kobotService.transportLayer)
             verify(timeout = 3000) { myBot.execute(mex) }
         }
 
         "A memory layer should save the current state" {
             val input = InputKobotMessage(1L, "ciao")
-            kobot.memoryLayer.tell(input, kobot.transportLayer)
-            val probe = TestKit(kobot.system)
+            kobotService.memoryLayer.tell(input, kobotService.transportLayer)
+            val probe = TestKit(kobotService.system)
             log.debug("Probing...")
-            kobot.memoryLayer.tell(GetMemory(1L), probe.ref)
-            probe.expectMsg(MemoryData(kobot.config.startState, SessionData()))
+            kobotService.memoryLayer.tell(GetMemory(1L), probe.ref)
+            probe.expectMsg(MemoryData(kobotService.config.startState, SessionData()))
         }
 
         "A memory layer should delete a state when END state is met" {
             val input = InputKobotMessage(1L, "ciao")
-            kobot.memoryLayer.tell(input, kobot.transportLayer)
+            kobotService.memoryLayer.tell(input, kobotService.transportLayer)
 
             val output =
-                OutputConversationMessage(1L, OutputKobotMessage(1L, listOf()), MemoryData(kobot.config.endState))
-            kobot.memoryLayer.tell(output, kobot.conversationLayer.first())
+                OutputConversationMessage(
+                    1L,
+                    OutputKobotMessage(1L, listOf()),
+                    MemoryData(kobotService.config.endState)
+                )
+            kobotService.memoryLayer.tell(output, kobotService.conversationLayer.first())
 
-            val probe = TestKit(kobot.system)
+            val probe = TestKit(kobotService.system)
             log.debug("Probing...")
-            kobot.memoryLayer.tell(GetMemory(1L), probe.ref)
+            kobotService.memoryLayer.tell(GetMemory(1L), probe.ref)
             probe.expectMsg(NoMemoryData(1L))
         }
     }

@@ -80,7 +80,7 @@ Try with this:
 
 Run the bot with
 ```shell script
-java -jar kobot.jar -config conversation.json telegram.json
+java -jar kobot.jar
 ```
 
 Now go to telegram and enjoy your first conversation with the bot!

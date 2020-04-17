@@ -15,15 +15,22 @@ class KobotConfig {
     }
 
     @Bean
+    fun databaseConfig(
+        @Value("\${db.username}") username: String,
+        @Value("\${db.password}") password: String,
+        @Value("\${db.url}") url: String
+    ) = DatabaseConfig(username, password, url)
+
+
+    @Bean
     fun botConfig(@Value("\${conversation.path}") conversationPath: String): BotConfig {
         log.info("Creating a bot config from conversation file: {}", conversationPath)
         return KobotParser.parse(Paths.get(conversationPath))
     }
 
     @Bean
-    fun telegramConfig(@Value("\${bot.name}") name: String, @Value("\${bot.token}") token: String): TelegramConfig {
-        log.debug("Creating a bot config: {} - {}", name, token)
-        return TelegramConfig(name, token)
-    }
+    fun telegramConfig(@Value("\${bot.name}") name: String, @Value("\${bot.token}") token: String) =
+        TelegramConfig(name, token)
+
 
 }

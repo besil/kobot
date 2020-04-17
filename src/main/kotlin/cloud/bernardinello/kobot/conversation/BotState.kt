@@ -95,8 +95,6 @@ class JdbcReadState(
     @JsonProperty("session-field") val sessionField: String
 ) : BotState(id, type = "jdbc-read") {
     init {
-//        if (query == "")
-//            throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
         if (sessionField == "")
             throw BotConfigException("Invalid session-field: '$sessionField' provided for state: '$id'")
         try {
@@ -116,9 +114,6 @@ class JdbcWriteState(
     @JsonProperty("query") val query: String
 ) : BotState(id, type = "jdbc-write") {
     init {
-//        if (query == "")
-//            throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
-
         val s: Statement = try {
             log.trace("Parsing query: $query")
             CCJSqlParserUtil.parse(query)

@@ -3,6 +3,7 @@ package cloud.bernardinello.kobot.services
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
+import cloud.bernardinello.kobot.conf.DatabaseConfig
 import cloud.bernardinello.kobot.conf.TelegramConfig
 import cloud.bernardinello.kobot.conversation.BotConfig
 import cloud.bernardinello.kobot.layers.AddConversationLayer
@@ -21,7 +22,10 @@ import org.springframework.stereotype.Service
 import org.telegram.telegrambots.ApiContextInitializer
 
 @Service
-class KobotService(@Autowired val config: BotConfig) {
+class KobotService(
+    @Autowired val config: BotConfig,
+    @Autowired val dbConfig: DatabaseConfig
+) {
     companion object {
         val log: Logger = LoggerFactory.getLogger(KobotService::class.java)
     }
@@ -38,7 +42,8 @@ class KobotService(@Autowired val config: BotConfig) {
         // layers
         transportLayer = system.actorOf(Props.create(TelegramTransportLayer::class.java), "transportLayer")
         memoryLayer = system.actorOf(Props.create(InMemoryLayer::class.java, config), "memoryLayer")
-        conversationLayer = (0..3).map { system.actorOf(Props.create(ConversationEngine::class.java, config)) }.toList()
+        conversationLayer =
+            (0..3).map { system.actorOf(Props.create(ConversationEngine::class.java, config, dbConfig)) }.toList()
         // monitoring
         monitoringActor = system.actorOf(Props.create(MonitorActor::class.java, config), "monitoring")
     }

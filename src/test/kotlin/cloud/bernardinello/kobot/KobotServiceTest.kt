@@ -1,6 +1,7 @@
 package cloud.bernardinello.kobot
 
 import akka.testkit.javadsl.TestKit
+import cloud.bernardinello.kobot.conf.DatabaseConfig
 import cloud.bernardinello.kobot.conversation.BotConfig
 import cloud.bernardinello.kobot.layers.*
 import cloud.bernardinello.kobot.layers.memory.MemoryData
@@ -42,7 +43,7 @@ class KobotServiceTest : StringSpec() {
             |]
             |}""".trimMargin()
         )
-        kobotService = KobotService(config)
+        kobotService = KobotService(config, DatabaseConfig("", "", ""))
     }
 
     init {

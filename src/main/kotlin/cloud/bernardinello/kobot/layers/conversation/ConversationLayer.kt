@@ -1,5 +1,6 @@
 package cloud.bernardinello.kobot.layers.conversation
 
+import cloud.bernardinello.kobot.conf.DatabaseConfig
 import cloud.bernardinello.kobot.conversation.*
 import cloud.bernardinello.kobot.layers.*
 import cloud.bernardinello.kobot.layers.memory.MemoryData
@@ -56,9 +57,14 @@ class InputChecker(data: MemoryData, mex: InputKobotMessage) {
     fun isValid(): Boolean = valid
 }
 
-class ConversationEngine(val config: BotConfig) : KobotActor() {
+class ConversationEngine(val config: BotConfig, val dbConfig: DatabaseConfig) : KobotActor() {
     companion object {
         val log: Logger = LoggerFactory.getLogger(ConversationEngine::class.java)
+    }
+
+    fun visit(state: JdbcReadState, accumulator: Accumulator) {
+        log.trace("Visiting a jdbc-read state")
+
     }
 
     @Suppress("UNUSED_PARAMETER")

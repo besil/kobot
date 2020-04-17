@@ -18,8 +18,8 @@ import cloud.bernardinello.kobot.monitoring.StartMonitoring
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.telegram.telegrambots.ApiContextInitializer
 
+@Deprecated("Use services")
 class KobotActorService(
     @Autowired val config: BotConfig,
     @Autowired val dbConfig: DatabaseConfig
@@ -65,7 +65,7 @@ class KobotActorService(
 
     fun startTelegram(telegramConfig: TelegramConfig) {
         log.trace("Starting telegram bot")
-        ApiContextInitializer.init()
+//        ApiContextInitializer.init()
         val telegramBot = MyTelegramBot(telegramConfig, transportLayer)
         transportLayer.tell(telegramBot, transportLayer)
     }

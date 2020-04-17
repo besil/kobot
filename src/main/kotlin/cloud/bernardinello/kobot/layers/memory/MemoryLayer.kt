@@ -2,47 +2,18 @@ package cloud.bernardinello.kobot.layers.memory
 
 import akka.actor.ActorRef
 import cloud.bernardinello.kobot.conversation.BotConfig
-import cloud.bernardinello.kobot.conversation.BotState
 import cloud.bernardinello.kobot.conversation.EndState
 import cloud.bernardinello.kobot.conversation.StartState
 import cloud.bernardinello.kobot.layers.*
+import cloud.bernardinello.kobot.services.memory.MemoryData
+import cloud.bernardinello.kobot.services.memory.NoMemoryData
+import cloud.bernardinello.kobot.services.memory.SessionData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class SessionData {
-    val data: MutableMap<String, Any> = mutableMapOf()
-
-    operator fun contains(key: String): Boolean {
-        return key in data
-    }
-
-    operator fun get(key: String): Any {
-        return data[key] ?: error("Session key not found: $key")
-    }
-
-    operator fun set(key: String, value: Any) {
-        data[key] = value
-    }
-
-    override fun toString(): String {
-        return data.toString()
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other is SessionData)
-            return this.data.equals(other.data)
-        return false
-    }
-
-    override fun hashCode(): Int {
-        return data.hashCode()
-    }
-}
-
-data class MemoryData(val state: BotState, val sessionData: SessionData = SessionData())
-data class NoMemoryData(val chatId: Long)
 
 @Suppress("UNUSED_PARAMETER")
+@Deprecated("Use services")
 class InMemoryLayer(config: BotConfig) : KobotActor() {
     companion object {
         val log: Logger = LoggerFactory.getLogger(InMemoryLayer::class.java)

@@ -1,6 +1,7 @@
 package cloud.bernardinello.kobot.layers
 
-import cloud.bernardinello.kobot.layers.memory.MemoryData
+import cloud.bernardinello.kobot.services.memory.MemoryData
+
 
 //sealed class KobotMessage(val chatId: Long)
 

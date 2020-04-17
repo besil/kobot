@@ -5,6 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
 
+@Deprecated("Use services")
 abstract class KobotActor : UntypedAbstractActor() {
     companion object {
         val log: Logger = LoggerFactory.getLogger(KobotActor::class.java)

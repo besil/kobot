@@ -4,11 +4,11 @@ import akka.testkit.javadsl.TestKit
 import cloud.bernardinello.kobot.conf.DatabaseConfig
 import cloud.bernardinello.kobot.conversation.BotConfig
 import cloud.bernardinello.kobot.layers.*
-import cloud.bernardinello.kobot.layers.memory.MemoryData
-import cloud.bernardinello.kobot.layers.memory.NoMemoryData
-import cloud.bernardinello.kobot.layers.memory.SessionData
 import cloud.bernardinello.kobot.layers.transport.MyTelegramBot
 import cloud.bernardinello.kobot.services.KobotActorService
+import cloud.bernardinello.kobot.services.memory.MemoryData
+import cloud.bernardinello.kobot.services.memory.NoMemoryData
+import cloud.bernardinello.kobot.services.memory.SessionData
 import cloud.bernardinello.kobot.utils.KobotParser
 import io.kotlintest.TestCase
 import io.kotlintest.specs.StringSpec

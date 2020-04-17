@@ -1,20 +1,26 @@
-package cloud.bernardinello.kobot.layers.conversation
+package cloud.bernardinello.kobot.services.conversation
 
-import cloud.bernardinello.kobot.conf.DatabaseConfig
 import cloud.bernardinello.kobot.conversation.*
-import cloud.bernardinello.kobot.layers.*
-import cloud.bernardinello.kobot.services.conversation.Accumulator
-import cloud.bernardinello.kobot.services.conversation.InputChecker
+import cloud.bernardinello.kobot.layers.InputConversationMessage
+import cloud.bernardinello.kobot.layers.InputKobotMessage
+import cloud.bernardinello.kobot.layers.OutputConversationMessage
+import cloud.bernardinello.kobot.layers.OutputKobotMessage
 import cloud.bernardinello.kobot.services.memory.MemoryData
-import org.slf4j.Logger
+import cloud.bernardinello.kobot.services.memory.MemoryService
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
+import org.springframework.scheduling.annotation.Async
+import org.springframework.stereotype.Service
 import java.lang.reflect.Method
 
-
-@Deprecated("Use services")
-class ConversationEngine(val config: BotConfig, val dbConfig: DatabaseConfig) : KobotActor() {
+@Service
+class ConversationService(
+    @Autowired val config: BotConfig,
+    @Lazy @Autowired val memoryService: MemoryService
+) {
     companion object {
-        val log: Logger = LoggerFactory.getLogger(ConversationEngine::class.java)
+        val log = LoggerFactory.getLogger(ConversationService::class.java)
     }
 
     fun visit(state: JdbcReadState, accumulator: Accumulator) {
@@ -71,7 +77,8 @@ class ConversationEngine(val config: BotConfig, val dbConfig: DatabaseConfig) : 
         }
     }
 
-    fun onReceive(message: InputConversationMessage) {
+    @Async
+    fun handle(message: InputConversationMessage) {
         val memory: MemoryData = message.memory
         val input: InputKobotMessage = message.input
         val chatId = input.chatId
@@ -86,7 +93,8 @@ class ConversationEngine(val config: BotConfig, val dbConfig: DatabaseConfig) : 
             val okm =
                 OutputKobotMessage(chatId, messages = listOf(inputCheck.message), choices = inputCheck.choices)
             val ocm = OutputConversationMessage(chatId, okm, memory)
-            sender.tell(ocm, self)
+//            return ocm
+            memoryService.handle(ocm)
         } else {
             if (memory.state is WaitForInputState) {
                 log.trace("Checking session-field of this wait-for-input state")
@@ -111,8 +119,8 @@ class ConversationEngine(val config: BotConfig, val dbConfig: DatabaseConfig) : 
             val newMemory = MemoryData(states.last(), memory.sessionData)
 
             val ocm = OutputConversationMessage(chatId, okm, newMemory)
-            sender.tell(ocm, self)
+//            return ocm
+            memoryService.handle(ocm)
         }
     }
 }
-

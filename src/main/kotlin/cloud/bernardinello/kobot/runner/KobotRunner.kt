@@ -5,9 +5,8 @@ import cloud.bernardinello.kobot.services.KobotActorService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
-import org.springframework.stereotype.Component
 
-@Component
+//@Component
 class KobotRunner(
     @Autowired val kobotActorService: KobotActorService,
     @Autowired val telegramConfig: TelegramConfig

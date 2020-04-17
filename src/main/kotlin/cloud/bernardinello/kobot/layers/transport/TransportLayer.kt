@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
+@Deprecated("Use services")
 class CliTransportLayer : UntypedAbstractActor() {
     companion object {
         val log: Logger = LoggerFactory.getLogger(CliTransportLayer::class.java)
@@ -43,6 +44,7 @@ class CliTransportLayer : UntypedAbstractActor() {
     }
 }
 
+@Deprecated("Use services")
 class MyTelegramBot(val config: TelegramConfig, val observer: ActorRef) : TelegramLongPollingBot() {
     companion object {
         val log: Logger = LoggerFactory.getLogger(MyTelegramBot::class.java)
@@ -66,6 +68,7 @@ class MyTelegramBot(val config: TelegramConfig, val observer: ActorRef) : Telegr
     }
 }
 
+@Deprecated("Use services")
 @Suppress("UNUSED_PARAMETER")
 class TelegramTransportLayer : KobotActor() {
     companion object {

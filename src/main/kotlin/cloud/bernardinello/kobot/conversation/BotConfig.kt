@@ -201,7 +201,8 @@ class BotConfig(val states: List<BotState>, val relationships: List<BotStateRela
 
     fun checkWaitForInputExpectedValues(graph: Graph<BotNode, BotEdge>) {
         log.trace("Checking wait-for-input static expected values")
-        val waitForInputNodes = graph.vertexSet().filter { it.state is WaitForInputState }
+        val waitForInputNodes = graph.vertexSet()
+            .filter { it.state is WaitForInputState && it.state.expectedValues is StaticExpectedValues }
         waitForInputNodes.forEach { wfi ->
             val state: WaitForInputState = wfi.state as WaitForInputState
             val expectedValues: Set<String> = (state.expectedValues as StaticExpectedValues).values.toSet()

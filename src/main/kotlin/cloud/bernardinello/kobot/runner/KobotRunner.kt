@@ -1,7 +1,7 @@
 package cloud.bernardinello.kobot.runner
 
 import cloud.bernardinello.kobot.conf.TelegramConfig
-import cloud.bernardinello.kobot.services.KobotService
+import cloud.bernardinello.kobot.services.KobotActorService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class KobotRunner(
-    @Autowired val kobotService: KobotService,
+    @Autowired val kobotActorService: KobotActorService,
     @Autowired val telegramConfig: TelegramConfig
 ) : CommandLineRunner {
     companion object {
@@ -18,8 +18,8 @@ class KobotRunner(
 
     override fun run(vararg args: String) {
         log.info("ARGS: ${args.toList()}")
-        log.debug("Config: {}", kobotService.config)
-        kobotService.start()
-        kobotService.startTelegram(telegramConfig)
+        log.debug("Config: {}", kobotActorService.config)
+        kobotActorService.start()
+        kobotActorService.startTelegram(telegramConfig)
     }
 }

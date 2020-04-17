@@ -18,16 +18,14 @@ import cloud.bernardinello.kobot.monitoring.StartMonitoring
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
 import org.telegram.telegrambots.ApiContextInitializer
 
-@Service
-class KobotService(
+class KobotActorService(
     @Autowired val config: BotConfig,
     @Autowired val dbConfig: DatabaseConfig
 ) {
     companion object {
-        val log: Logger = LoggerFactory.getLogger(KobotService::class.java)
+        val log: Logger = LoggerFactory.getLogger(KobotActorService::class.java)
     }
 
     val system: ActorSystem

@@ -6,7 +6,7 @@ import io.kotlintest.matchers.string.shouldContain
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 
-class KobotServiceParserTest : StringSpec() {
+class KobotActorServiceParserTest : StringSpec() {
 
     init {
         "A malformed state json should throw exception" {

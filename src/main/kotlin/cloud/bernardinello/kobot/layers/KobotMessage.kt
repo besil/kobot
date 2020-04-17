@@ -10,7 +10,6 @@ data class InputConversationMessage(val chatId: Long, val input: InputKobotMessa
 
 // Output
 data class OutputKobotMessage(val chatId: Long, val messages: List<String>, val choices: List<String> = listOf())
-
 data class OutputConversationMessage(val chatId: Long, val output: OutputKobotMessage, val memory: MemoryData)
 
 // Utilities

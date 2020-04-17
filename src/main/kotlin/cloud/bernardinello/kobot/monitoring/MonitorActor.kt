@@ -12,6 +12,7 @@ class MonitorActor(val botConfig: BotConfig) : KobotActor() {
         val logger: Logger = LoggerFactory.getLogger(MonitorActor::class.java)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onReceive(start: StartMonitoring) {
         log.debug("Starting monitoring api...")
     }

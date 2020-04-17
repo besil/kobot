@@ -113,10 +113,10 @@ class JacksonNativeSerializationTest : StringSpec() {
                     |}""".trimMargin()
                 ) as Foo
             }
-            println(e.message)
-            println(e.typeId)
-            println(e.baseType)
-            println(e.cause)
+            log.debug(e.message)
+            log.debug(e.typeId)
+            log.debug("{}", e.baseType)
+            log.debug("{}", e.cause)
         }
 
         "A foo can't hold bar" {
@@ -130,11 +130,11 @@ class JacksonNativeSerializationTest : StringSpec() {
                 |}""".trimMargin()
                 ) as FooBar
             }
-            println(e.message)
-            println(e.localizedMessage)
-            println(e.location)
-            println(e.type)
-            println(e.cause)
+            log.debug(e.message)
+            log.debug(e.localizedMessage)
+            log.debug("{}", e.location)
+            log.debug("{}", e.type)
+            log.debug("{}", e.cause)
         }
     }
 }

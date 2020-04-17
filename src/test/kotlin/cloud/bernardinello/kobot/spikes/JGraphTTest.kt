@@ -1,6 +1,5 @@
 package cloud.bernardinello.kobot.spikes
 
-import cloud.bernardinello.kobot.utils.LogUtils
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import org.jgrapht.Graph
@@ -32,8 +31,6 @@ class JGraphTTest : StringSpec() {
     }
 
     init {
-        LogUtils.setLogLevel(default = "warn")
-
         "A simple graph should be" {
             val g: Graph<Node, Edge> = SimpleDirectedWeightedGraph(
                 Edge::class.java

@@ -9,7 +9,6 @@ import cloud.bernardinello.kobot.layers.memory.SessionData
 import cloud.bernardinello.kobot.layers.transport.MyTelegramBot
 import cloud.bernardinello.kobot.services.KobotService
 import cloud.bernardinello.kobot.utils.KobotParser
-import cloud.bernardinello.kobot.utils.LogUtils
 import io.kotlintest.TestCase
 import io.kotlintest.specs.StringSpec
 import io.mockk.every
@@ -47,8 +46,6 @@ class KobotServiceTest : StringSpec() {
     }
 
     init {
-        LogUtils.setLogLevel(default = "info")
-
         "simple behaviour test" {
             kobotService.transportLayer.tell(AddMemoryLayer, kobotService.memoryLayer)
             kobotService.memoryLayer.tell(AddConversationLayer, kobotService.conversationLayer.first())

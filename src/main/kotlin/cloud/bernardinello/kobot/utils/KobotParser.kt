@@ -15,10 +15,6 @@ object KobotParser {
     val log: Logger = LoggerFactory.getLogger(KobotParser::class.java)
     val objectMapper: ObjectMapper = jacksonObjectMapper()
 
-    init {
-        LogUtils.setLogLevel()
-    }
-
     inline fun <reified T> parse(json: Path): T {
         return parse(json.toFile())
     }

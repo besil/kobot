@@ -1,7 +1,6 @@
 package cloud.bernardinello.kobot.conversation
 
 import cloud.bernardinello.kobot.utils.KobotParser
-import cloud.bernardinello.kobot.utils.LogUtils
 import io.kotlintest.TestCase
 import io.kotlintest.matchers.instanceOf
 import io.kotlintest.matchers.string.shouldContain
@@ -22,8 +21,6 @@ class BotConfigTest : StringSpec() {
     }
 
     init {
-        LogUtils.setLogLevel(default = "info")
-
         "A bot configuration should be" {
             val config: BotConfig = KobotParser.parse(
                 """{

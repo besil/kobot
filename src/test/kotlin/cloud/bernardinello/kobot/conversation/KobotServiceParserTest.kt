@@ -2,7 +2,6 @@ package cloud.bernardinello.kobot.conversation
 
 import cloud.bernardinello.kobot.utils.BotConfigParserException
 import cloud.bernardinello.kobot.utils.KobotParser
-import cloud.bernardinello.kobot.utils.LogUtils
 import io.kotlintest.matchers.string.shouldContain
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
@@ -10,8 +9,6 @@ import io.kotlintest.specs.StringSpec
 class KobotServiceParserTest : StringSpec() {
 
     init {
-        LogUtils.setLogLevel(default = "info")
-
         "A malformed state json should throw exception" {
             shouldThrow<BotConfigParserException> {
                 KobotParser.parse(

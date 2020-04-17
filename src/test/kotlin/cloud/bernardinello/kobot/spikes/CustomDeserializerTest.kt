@@ -1,6 +1,5 @@
 package cloud.bernardinello.kobot.spikes
 
-import cloud.bernardinello.kobot.utils.LogUtils
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -85,8 +84,6 @@ class CustomDeserializerTest : StringSpec() {
     }
 
     init {
-        LogUtils.setLogLevel(default = "warn")
-
         "a bar deserialization" {
             val bar: FooBar = om
                 .readValue(

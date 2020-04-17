@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory
         JsonSubTypes.Type(name = "start", value = StartState::class),
         JsonSubTypes.Type(name = "end", value = EndState::class),
         JsonSubTypes.Type(name = "send-mex", value = SendMexState::class),
-        JsonSubTypes.Type(name = "wait-for-input", value = WaitForInputState::class)
+        JsonSubTypes.Type(name = "wait-for-input", value = WaitForInputState::class),
+        JsonSubTypes.Type(name = "jdbc-read", value = JdbcReadState::class),
+        JsonSubTypes.Type(name = "jdbc-write", value = JdbcWriteState::class)
     ]
 )
 abstract class BotState(val id: String, val type: String) {
@@ -81,3 +83,14 @@ class WaitForInputState(
             throw BotConfigException("Invalid expected-type '$expectedType'. Valid values are: $availableExpectedTypes")
     }
 }
+
+class JdbcReadState(
+    id: String,
+    @JsonProperty("query") val query: String,
+    @JsonProperty("session-field") val sessionField: String
+) : BotState(id, type = "jdbc-read")
+
+class JdbcWriteState(
+    id: String,
+    @JsonProperty("query") val query: String
+) : BotState(id, type = "jdbc-write")

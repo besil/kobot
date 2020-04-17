@@ -1,0 +1,60 @@
+{
+  "states": [
+    {
+      "id": "start",
+      "type": "start"
+    },
+    {
+      "id": "get-db",
+      "type": "jdbc-read",
+      "query": "select * from foo",
+      "session-field": "db-data"
+    },
+    {
+      "id": "info-retrieved",
+      "type": "send-mex",
+      "message": "Retrieved data from db"
+    },
+    {
+      "id": "show-retrieved",
+      "type": "wait-for-input",
+      "expected-type": "string",
+      "expected-values": {
+        "type": "session",
+        "key": "db-data"
+      },
+      "session-field": "choice"
+    },
+    {
+      "id": "show-choice",
+      "type": "send-mex",
+      "message": "You choose: !{choice}"
+    },
+    {
+      "id": "end",
+      "type": "end"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "start",
+      "to": "get-db"
+    },
+    {
+      "from": "get-db",
+      "to": "info-retrieved"
+    },
+    {
+      "from": "info-retrieved",
+      "to": "show-retrieved"
+    },
+    {
+      "from": "show-retrieved",
+      "to": "show-choice"
+    },
+    {
+      "from": "show-choice",
+      "to": "end"
+    }
+  ]
+}

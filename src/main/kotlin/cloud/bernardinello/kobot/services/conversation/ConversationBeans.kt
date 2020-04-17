@@ -2,9 +2,9 @@ package cloud.bernardinello.kobot.services.conversation
 
 import cloud.bernardinello.kobot.conversation.StaticExpectedValues
 import cloud.bernardinello.kobot.conversation.WaitForInputState
-import cloud.bernardinello.kobot.layers.InputKobotMessage
 import cloud.bernardinello.kobot.services.memory.MemoryData
 import cloud.bernardinello.kobot.services.memory.SessionData
+import cloud.bernardinello.kobot.utils.InputKobotMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

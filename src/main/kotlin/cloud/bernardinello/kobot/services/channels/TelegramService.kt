@@ -1,9 +1,9 @@
 package cloud.bernardinello.kobot.services.channels
 
 import cloud.bernardinello.kobot.conf.TelegramConfig
-import cloud.bernardinello.kobot.layers.OutputKobotMessage
 import cloud.bernardinello.kobot.runner.TelegramRunner
 import cloud.bernardinello.kobot.services.transport.TransportService
+import cloud.bernardinello.kobot.utils.OutputKobotMessage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -37,10 +37,10 @@ class TelegramService(
         transportService.handle(chatId, message)
     }
 
-    override fun send(outMex: OutputKobotMessage) {
-        val chatId = outMex.chatId
-        val finalMex: String = outMex.messages.joinToString("\n")
-        val finalChoices: List<String> = outMex.choices
+    override fun send(message: OutputKobotMessage) {
+        val chatId = message.chatId
+        val finalMex: String = message.messages.joinToString("\n")
+        val finalChoices: List<String> = message.choices
 
         val km = if (finalChoices.isNotEmpty())
             ReplyKeyboardMarkup(finalChoices.chunked(2).map { pairs ->

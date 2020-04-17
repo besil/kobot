@@ -3,11 +3,11 @@ package cloud.bernardinello.kobot.services.memory
 import cloud.bernardinello.kobot.conversation.BotConfig
 import cloud.bernardinello.kobot.conversation.EndState
 import cloud.bernardinello.kobot.conversation.StartState
-import cloud.bernardinello.kobot.layers.InputConversationMessage
-import cloud.bernardinello.kobot.layers.InputKobotMessage
-import cloud.bernardinello.kobot.layers.OutputConversationMessage
 import cloud.bernardinello.kobot.services.conversation.ConversationService
 import cloud.bernardinello.kobot.services.transport.TransportService
+import cloud.bernardinello.kobot.utils.InputConversationMessage
+import cloud.bernardinello.kobot.utils.InputKobotMessage
+import cloud.bernardinello.kobot.utils.OutputConversationMessage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -28,18 +28,18 @@ class InMemoryService(
     val cache: MutableMap<Long, MemoryData> = mutableMapOf()
 
     @Async
-    override fun handle(outputMessage: OutputConversationMessage) {
-        log.trace("Updating data for ${outputMessage.chatId}")
+    override fun handle(message: OutputConversationMessage) {
+        log.trace("Updating data for ${message.chatId}")
 
-        val newMemory = outputMessage.memory
-        val chatId = outputMessage.chatId
+        val newMemory = message.memory
+        val chatId = message.chatId
         if (newMemory.state is EndState) {
-            log.trace("Removing session data for: ${outputMessage.chatId}")
-            cache.remove(outputMessage.output.chatId)
+            log.trace("Removing session data for: ${message.chatId}")
+            cache.remove(message.output.chatId)
         } else {
             cache[chatId] = newMemory
         }
-        transportService.handle(outputMessage.output)
+        transportService.handle(message.output)
     }
 
     @Async
@@ -49,7 +49,11 @@ class InMemoryService(
             log.trace("Create new session for ${message.chatId}")
             cache[message.chatId] = MemoryData(startState, SessionData())
         }
-        val input = InputConversationMessage(message.chatId, message, cache[message.chatId]!!)
+        val input = InputConversationMessage(
+            message.chatId,
+            message,
+            cache[message.chatId]!!
+        )
 
         conversationService.handle(input)
     }

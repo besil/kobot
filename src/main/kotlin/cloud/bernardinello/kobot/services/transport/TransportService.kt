@@ -1,9 +1,9 @@
 package cloud.bernardinello.kobot.services.transport
 
-import cloud.bernardinello.kobot.layers.InputKobotMessage
-import cloud.bernardinello.kobot.layers.OutputKobotMessage
 import cloud.bernardinello.kobot.services.channels.ChannelService
 import cloud.bernardinello.kobot.services.memory.MemoryService
+import cloud.bernardinello.kobot.utils.InputKobotMessage
+import cloud.bernardinello.kobot.utils.OutputKobotMessage
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Async

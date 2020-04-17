@@ -1,7 +1,7 @@
 package cloud.bernardinello.kobot.services.memory
 
-import cloud.bernardinello.kobot.layers.InputKobotMessage
-import cloud.bernardinello.kobot.layers.OutputConversationMessage
+import cloud.bernardinello.kobot.utils.InputKobotMessage
+import cloud.bernardinello.kobot.utils.OutputConversationMessage
 
 
 interface MemoryService {

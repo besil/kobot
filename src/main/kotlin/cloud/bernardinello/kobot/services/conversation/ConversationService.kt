@@ -1,12 +1,12 @@
 package cloud.bernardinello.kobot.services.conversation
 
 import cloud.bernardinello.kobot.conversation.*
-import cloud.bernardinello.kobot.layers.InputConversationMessage
-import cloud.bernardinello.kobot.layers.InputKobotMessage
-import cloud.bernardinello.kobot.layers.OutputConversationMessage
-import cloud.bernardinello.kobot.layers.OutputKobotMessage
 import cloud.bernardinello.kobot.services.memory.MemoryData
 import cloud.bernardinello.kobot.services.memory.MemoryService
+import cloud.bernardinello.kobot.utils.InputConversationMessage
+import cloud.bernardinello.kobot.utils.InputKobotMessage
+import cloud.bernardinello.kobot.utils.OutputConversationMessage
+import cloud.bernardinello.kobot.utils.OutputKobotMessage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -91,7 +91,11 @@ class ConversationService(
         if (inputCheck.isNotValid()) {
             log.trace("Choice not recognized: ${inputCheck.choices}")
             val okm =
-                OutputKobotMessage(chatId, messages = listOf(inputCheck.message), choices = inputCheck.choices)
+                OutputKobotMessage(
+                    chatId,
+                    messages = listOf(inputCheck.message),
+                    choices = inputCheck.choices
+                )
             val ocm = OutputConversationMessage(chatId, okm, memory)
 //            return ocm
             memoryService.handle(ocm)
@@ -115,10 +119,15 @@ class ConversationService(
                 this.visit(state, acc)
             }
 
-            val okm = OutputKobotMessage(chatId, acc.outputMessages, acc.choices)
+            val okm = OutputKobotMessage(
+                chatId,
+                acc.outputMessages,
+                acc.choices
+            )
             val newMemory = MemoryData(states.last(), memory.sessionData)
 
-            val ocm = OutputConversationMessage(chatId, okm, newMemory)
+            val ocm =
+                OutputConversationMessage(chatId, okm, newMemory)
 //            return ocm
             memoryService.handle(ocm)
         }

@@ -54,6 +54,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- sql utilities -->
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>3.1</version>
+        </dependency>
+
         <!-- Telegram -->
         <dependency>
             <groupId>org.telegram</groupId>

@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import net.sf.jsqlparser.parser.CCJSqlParserUtil
+import net.sf.jsqlparser.statement.Statement
+import net.sf.jsqlparser.statement.insert.Insert
+import net.sf.jsqlparser.statement.select.Select
+import net.sf.jsqlparser.statement.update.Update
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -88,9 +93,49 @@ class JdbcReadState(
     id: String,
     @JsonProperty("query") val query: String,
     @JsonProperty("session-field") val sessionField: String
-) : BotState(id, type = "jdbc-read")
+) : BotState(id, type = "jdbc-read") {
+    init {
+//        if (query == "")
+//            throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
+        if (sessionField == "")
+            throw BotConfigException("Invalid session-field: '$sessionField' provided for state: '$id'")
+        try {
+            log.trace("Parsing query: $query")
+            CCJSqlParserUtil.parse(query) as Select
+        } catch (e: ClassCastException) {
+            throw BotConfigException("Invalid query: '$query' provided for state: '$id' is not a select")
+        } catch (e: Exception) {
+            log.trace("{}", e)
+            throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
+        }
+    }
+}
 
 class JdbcWriteState(
     id: String,
     @JsonProperty("query") val query: String
-) : BotState(id, type = "jdbc-write")
+) : BotState(id, type = "jdbc-write") {
+    init {
+//        if (query == "")
+//            throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
+
+        val s: Statement = try {
+            log.trace("Parsing query: $query")
+            CCJSqlParserUtil.parse(query)
+        } catch (e: Exception) {
+            throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
+        }
+
+        try {
+            s as Update
+        } catch (e: ClassCastException) {
+            log.trace("Update cast failed, trying as Insert")
+            try {
+                s as Insert
+            } catch (e: ClassCastException) {
+                throw BotConfigException("Invalid query: '$query' provided for state: '$id' is not an insert or update")
+            }
+        }
+    }
+
+}

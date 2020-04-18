@@ -48,7 +48,7 @@ class ConversationService(
                 // check if key is present
                 val key = state.expectedValues.key
                 if (key !in accumulator.context)
-                    throw ConversationServiceException("Session key '$key' is not present in context data")
+                    throw ConversationServiceException("Session keys ['$key'] are not present in context data")
                 // check if it a list or not
                 if (accumulator.context[key] !is List<*>)
                     throw ConversationServiceException("Session key '$key' doesn't contain a List: '${accumulator.context[key]}' found")

@@ -81,10 +81,11 @@ class ConversationServiceTest : StringSpec() {
             val inputCheck: InputCheck = conversationService.checkInput(wfi, context, "hello")
             inputCheck.valid shouldBe false
 //            inputCheck.message shouldBe "Error!"
-            inputCheck.choices shouldBe listOf(1)
+            inputCheck.choices shouldBe listOf("1")
         }
 
         "checkInput on session expected values should return on-mismatch when invalid input is provided" {
+            TODO("add on-mismatch for session expected values")
             fail("todo")
         }
 

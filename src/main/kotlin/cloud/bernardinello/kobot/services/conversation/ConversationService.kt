@@ -167,12 +167,26 @@ class ConversationService(
         if (state is WaitForInputState) {
             val expectedValues = state.expectedValues
 
-            if (expectedValues is StaticExpectedValues) {
-                log.trace("Got static values: {}", expectedValues)
-                if (!expectedValues.values.contains(input))
-                    return InputCheck(false, expectedValues.onMismatch, expectedValues.values)
-            } else
-                log.trace("Expected values is: {}. Unhandled for now", expectedValues::class.simpleName)
+            when (expectedValues) {
+                is StaticExpectedValues -> {
+                    log.trace("Got static values: {}", expectedValues)
+                    if (!expectedValues.values.contains(input))
+                        return InputCheck(false, expectedValues.onMismatch, expectedValues.values)
+                }
+                is SessionExpectedValues -> {
+                    val key = expectedValues.key
+                    if (!context.contains(key))
+                        throw ConversationServiceException("Session keys ['$key'] are not present in context data")
+                    if (context[key] !is List<*>)
+                        throw ConversationServiceException("Session key '$key' doesn't contain a List: '${context[key]}' found")
+
+                    // do the actual check
+                    val values = context[key] as List<*>
+                    if (!values.contains(input))
+                        return InputCheck(false, "Error!", values.map { it.toString() })
+                }
+                else -> log.trace("Expected values is: {}. Unhandled for now", expectedValues::class.simpleName)
+            }
         }
         log.trace("Returning valid")
         return InputCheck(valid = true)

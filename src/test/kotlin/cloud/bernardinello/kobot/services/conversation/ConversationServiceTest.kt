@@ -3,18 +3,37 @@ package cloud.bernardinello.kobot.services.conversation
 import cloud.bernardinello.kobot.conversation.*
 import cloud.bernardinello.kobot.services.memory.MemoryService
 import cloud.bernardinello.kobot.services.memory.SessionData
-import io.kotlintest.fail
+import io.kotlintest.TestCase
 import io.kotlintest.matchers.string.shouldContain
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import io.mockk.mockk
+import org.slf4j.LoggerFactory
 
 class ConversationServiceTest : StringSpec() {
+
+    companion object {
+        val log = LoggerFactory.getLogger(ConversationServiceTest::class.java)
+    }
+
+    override fun beforeTest(testCase: TestCase) {
+        log.info(
+            "\n-----------------------------\n" +
+                    "Running test: ${testCase.name}\n" +
+                    "-----------------------------\n"
+        )
+    }
 
     init {
         val config = mockk<BotConfig>(relaxUnitFun = true)
         val memoryService = mockk<MemoryService>(relaxUnitFun = true)
+
+        "conversation service has utilities for extracting session keys from a string" {
+            val conversationService = ConversationService(config, memoryService)
+            val keys = conversationService.extractSessionKeys("!{foo} must not be !{bar}. Except a !{foo-bar}!")
+            keys shouldBe listOf("foo", "bar", "foo-bar")
+        }
 
         "checkInput should return on-mismatch message when invalid input is provided" {
             val conversationService = ConversationService(config, memoryService)
@@ -42,7 +61,7 @@ class ConversationServiceTest : StringSpec() {
             val wfi = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
-                expectedValues = SessionExpectedValues(key = "foo")
+                expectedValues = SessionExpectedValues(key = "foo", onMismatch = "error")
             )
             val context = SessionData()
 
@@ -62,7 +81,7 @@ class ConversationServiceTest : StringSpec() {
             val wfi = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
-                expectedValues = SessionExpectedValues(key = "foo")
+                expectedValues = SessionExpectedValues(key = "foo", onMismatch = "Error!")
             )
 
             val context = SessionData()
@@ -80,13 +99,8 @@ class ConversationServiceTest : StringSpec() {
             context["foo"] = listOf(1)
             val inputCheck: InputCheck = conversationService.checkInput(wfi, context, "hello")
             inputCheck.valid shouldBe false
-//            inputCheck.message shouldBe "Error!"
+            inputCheck.message shouldBe "Error!"
             inputCheck.choices shouldBe listOf("1")
-        }
-
-        "checkInput on session expected values should return on-mismatch when invalid input is provided" {
-            TODO("add on-mismatch for session expected values")
-            fail("todo")
         }
 
         "update context should save variables in session fields" {
@@ -130,7 +144,7 @@ class ConversationServiceTest : StringSpec() {
             val context = SessionData()
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(context))
-            }.message shouldContain "Key ['world'] not found in session"
+            }.message shouldContain "Session keys [world] are not present in context data"
 
             context.set("world", "foo")
             val acc = conversationService.visit(state, Accumulator(context))
@@ -147,12 +161,12 @@ class ConversationServiceTest : StringSpec() {
             val context = SessionData()
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(context))
-            }.message shouldContain "Session keys ['greet', 'someone'] are not present in context data"
+            }.message shouldContain "Session keys [greet, someone] are not present in context data"
 
             context["greet"] = "hello"
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(context))
-            }.message shouldContain "Session keys ['someone'] are not present in context data"
+            }.message shouldContain "Session keys [someone] are not present in context data"
 
             context["someone"] = "world"
             val acc = conversationService.visit(state, Accumulator(context))
@@ -187,7 +201,8 @@ class ConversationServiceTest : StringSpec() {
                 id = "wfi",
                 expectedType = "string",
                 expectedValues = SessionExpectedValues(
-                    key = "foo"
+                    key = "foo",
+                    onMismatch = "error"
                 )
             )
             shouldThrow<ConversationServiceException> {
@@ -201,7 +216,8 @@ class ConversationServiceTest : StringSpec() {
                 id = "wfi",
                 expectedType = "string",
                 expectedValues = SessionExpectedValues(
-                    key = "foo"
+                    key = "foo",
+                    onMismatch = "error"
                 )
             )
 

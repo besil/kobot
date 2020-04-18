@@ -234,10 +234,12 @@ class BotStateTest : StringSpec() {
                 KobotParser.parse(
                     """{
                 |"type": "session",
-                |"key": "session-field"
+                |"key": "session-field",
+                |"on-mismatch": "error"
                 |}""".trimMargin()
                 )
             sessionExpectedValues.key shouldBe "session-field"
+            sessionExpectedValues.onMismatch shouldBe "error"
         }
 
         "A wait-for-input state" {

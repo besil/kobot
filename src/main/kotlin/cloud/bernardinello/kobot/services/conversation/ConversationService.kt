@@ -59,20 +59,34 @@ class ConversationService(
         return accumulator
     }
 
+    fun extractSessionKeys(s: String): List<String> {
+        val regex = """!\{(.*?)\}""".toRegex()
+
+        if (regex.containsMatchIn(s))
+            regex.findAll(s)
+
+        val matches: List<MatchResult> = regex.findAll(s).toList()
+        val keys = matches.map { it.groupValues.last() }
+        return keys
+    }
+
     fun visit(state: SendMexState, accumulator: Accumulator): Accumulator {
         log.trace("Visiting a send-mex")
         val mex = state.message
-        val regex = ".*!\\{(.*)}.*".toRegex()
+        val context = accumulator.context
 
-        val outputMex: String =
-            if (regex.matches(mex)) {
-                log.trace("Found regexp match of session key in message")
-                val sessionParamName: String = regex.find(mex)!!.groupValues[1]
-                log.trace("Looking for param {} in session data: {}", sessionParamName, accumulator.context)
-                val sessionValue = accumulator.context[sessionParamName].toString()
+        val keys = extractSessionKeys(mex)
+        val missingSessionKeys = keys.filter { !context.contains(it) }.toList().sorted()
 
-                mex.replace("!{$sessionParamName}", sessionValue)
-            } else mex
+        if (missingSessionKeys.isNotEmpty()) {
+            log.trace("Missing keys: {}", missingSessionKeys)
+            throw ConversationServiceException("Session keys $missingSessionKeys are not present in context data")
+        }
+
+        var outputMex = mex
+        keys.forEach {
+            outputMex = outputMex.replace("!{$it}", context[it].toString())
+        }
 
         log.trace("Adding message: {}", outputMex)
         accumulator.addMessage(text = outputMex)

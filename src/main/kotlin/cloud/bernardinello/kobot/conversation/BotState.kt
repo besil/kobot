@@ -68,10 +68,13 @@ data class StaticExpectedValues(val values: List<String>, @JsonProperty("on-mism
 
 class AnyExpectedValues : ExpectedValues(type = "any")
 
-class SessionExpectedValues(val key: String) : ExpectedValues(type = "session") {
+class SessionExpectedValues(val key: String, @JsonProperty("on-mismatch") val onMismatch: String) :
+    ExpectedValues(type = "session") {
     init {
         if (key == "")
             throw BotConfigException("A session expected-values type can't have empty key")
+        if (onMismatch.isEmpty())
+            throw BotConfigException("A session expected-values on-mismatch can't be empty")
     }
 }
 

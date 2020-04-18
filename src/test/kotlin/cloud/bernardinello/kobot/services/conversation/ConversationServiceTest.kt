@@ -3,6 +3,7 @@ package cloud.bernardinello.kobot.services.conversation
 import cloud.bernardinello.kobot.conversation.*
 import cloud.bernardinello.kobot.services.memory.MemoryService
 import cloud.bernardinello.kobot.services.memory.SessionData
+import io.kotlintest.fail
 import io.kotlintest.matchers.string.shouldContain
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
@@ -17,21 +18,74 @@ class ConversationServiceTest : StringSpec() {
 
         "checkInput should return on-mismatch message when invalid input is provided" {
             val conversationService = ConversationService(config, memoryService)
+            val context = SessionData()
 
             val wfi = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
                 expectedValues = StaticExpectedValues(listOf("ciao", "mondo"), "Error!")
             )
-            val inputCheck: InputCheck = conversationService.checkInput(wfi, "hello")
+            val inputCheck: InputCheck = conversationService.checkInput(wfi, context, "hello")
             inputCheck.valid shouldBe false
             inputCheck.message shouldBe "Error!"
             inputCheck.choices shouldBe listOf("ciao", "mondo")
 
-            val inputCheck2 = conversationService.checkInput(wfi, "ciao")
+            val inputCheck2 = conversationService.checkInput(wfi, context, "ciao")
             inputCheck2.valid shouldBe true
             inputCheck2.message shouldBe ""
             inputCheck2.choices shouldBe listOf()
+        }
+
+        "checkInput on session expected values should throw exception if key not present" {
+            val conversationService = ConversationService(config, memoryService)
+
+            val wfi = WaitForInputState(
+                id = "wfi",
+                expectedType = "string",
+                expectedValues = SessionExpectedValues(key = "foo")
+            )
+            val context = SessionData()
+
+            shouldThrow<ConversationServiceException> {
+                conversationService.checkInput(wfi, context, "hello")
+            }.message shouldContain "Session keys ['foo'] are not present in context data"
+
+//            val inputCheck: InputCheck = conversationService.checkInput(wfi, context, "hello")
+//            inputCheck.valid shouldBe false
+//            inputCheck.message shouldBe "Error!"
+//            inputCheck.choices shouldBe listOf("ciao", "mondo")
+        }
+
+        "checkInput on session expected values should throw exception if key is not a list of elements" {
+            val conversationService = ConversationService(config, memoryService)
+
+            val wfi = WaitForInputState(
+                id = "wfi",
+                expectedType = "string",
+                expectedValues = SessionExpectedValues(key = "foo")
+            )
+
+            val context = SessionData()
+            context["foo"] = "bar"
+
+            shouldThrow<ConversationServiceException> {
+                conversationService.checkInput(wfi, context, "hello")
+            }.message shouldContain "Session key 'foo' doesn't contain a List: 'bar' found"
+
+            context["foo"] = 1
+            shouldThrow<ConversationServiceException> {
+                conversationService.checkInput(wfi, context, "hello")
+            }.message shouldContain "Session key 'foo' doesn't contain a List: '1' found"
+
+            context["foo"] = listOf(1)
+            val inputCheck: InputCheck = conversationService.checkInput(wfi, context, "hello")
+            inputCheck.valid shouldBe false
+//            inputCheck.message shouldBe "Error!"
+            inputCheck.choices shouldBe listOf(1)
+        }
+
+        "checkInput on session expected values should return on-mismatch when invalid input is provided" {
+            fail("todo")
         }
 
         "update context should save variables in session fields" {
@@ -68,6 +122,44 @@ class ConversationServiceTest : StringSpec() {
             acc.context.data.size shouldBe 0
         }
 
+        "if send-mex references a non existing session element, an exception should be thrown" {
+            val conversationService = ConversationService(config, memoryService)
+            val state = SendMexState("send", "hello !{world}")
+
+            val context = SessionData()
+            shouldThrow<ConversationServiceException> {
+                conversationService.visit(state, Accumulator(context))
+            }.message shouldContain "Key ['world'] not found in session"
+
+            context.set("world", "foo")
+            val acc = conversationService.visit(state, Accumulator(context))
+
+            acc.outputMessages shouldBe listOf("hello foo")
+            acc.choices shouldBe listOf()
+            acc.context shouldBe context
+        }
+
+        "send-mex could reference multiple session keys" {
+            val conversationService = ConversationService(config, memoryService)
+            val state = SendMexState("send", "!{greet} !{someone}")
+
+            val context = SessionData()
+            shouldThrow<ConversationServiceException> {
+                conversationService.visit(state, Accumulator(context))
+            }.message shouldContain "Session keys ['greet', 'someone'] are not present in context data"
+
+            context["greet"] = "hello"
+            shouldThrow<ConversationServiceException> {
+                conversationService.visit(state, Accumulator(context))
+            }.message shouldContain "Session keys ['someone'] are not present in context data"
+
+            context["someone"] = "world"
+            val acc = conversationService.visit(state, Accumulator(context))
+            acc.context shouldBe context
+            acc.choices shouldBe listOf()
+            acc.outputMessages.toList() shouldBe listOf("hello world")
+        }
+
         "visiting a static wait-for-input state with no session" {
             val conversationService = ConversationService(config, memoryService)
             val states = listOf(
@@ -99,7 +191,7 @@ class ConversationServiceTest : StringSpec() {
             )
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(SessionData()))
-            }.message shouldContain "Session key 'foo' is not present in context data"
+            }.message shouldContain "Session keys ['foo'] are not present in context data"
         }
 
         "a session wait-for-input expected values must be a collection" {

@@ -25,7 +25,7 @@ class ConversationService(
     }
 
     fun visit(state: JdbcReadState, accumulator: Accumulator): Accumulator {
-        log.trace("Visiting a jdbc-read state")
+        log.trace("Visiting a jdbc-read state: {}", state.id)
         return accumulator
     }
 
@@ -111,7 +111,7 @@ class ConversationService(
 
         // validate input
         // If input is != choices, return with same choices and on-mismatch input
-        val inputCheck: InputCheck = checkInput(currentState, input.text)
+        val inputCheck: InputCheck = checkInput(currentState, memory.sessionData, input.text)
         if (inputCheck.isNotValid()) {
             val okm: OutputKobotMessage = inputCheck.kobotMessage(chatId)
             val ocm = OutputConversationMessage(chatId, okm, memory)
@@ -161,7 +161,7 @@ class ConversationService(
         return context
     }
 
-    fun checkInput(state: BotState, input: String): InputCheck {
+    fun checkInput(state: BotState, context: SessionData, input: String): InputCheck {
         log.trace("Looking into: {} {}", state.id, state.type)
 
         if (state is WaitForInputState) {

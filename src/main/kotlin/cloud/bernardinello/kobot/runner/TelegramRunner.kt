@@ -1,7 +1,6 @@
 package cloud.bernardinello.kobot.runner
 
 import cloud.bernardinello.kobot.services.channels.TelegramService
-import cloud.bernardinello.kobot.services.transport.TransportService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,8 +11,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
 @Component
 class TelegramRunner(
-    @Autowired val telegramService: TelegramService,
-    @Autowired val transportService: TransportService
+    @Autowired val telegramService: TelegramService
 ) : CommandLineRunner {
     companion object {
         val log: Logger = LoggerFactory.getLogger(TelegramRunner::class.java)

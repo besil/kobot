@@ -24,29 +24,42 @@ class ConversationService(
         val log = LoggerFactory.getLogger(ConversationService::class.java)
     }
 
-    fun visit(state: JdbcReadState, accumulator: Accumulator) {
+    fun visit(state: JdbcReadState, accumulator: Accumulator): Accumulator {
         log.trace("Visiting a jdbc-read state")
+        return accumulator
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun visit(state: StartState, accumulator: Accumulator) {
-        log.trace("Visiting a Start State")
+    fun visit(state: StartState, accumulator: Accumulator): Accumulator {
+        log.trace("Visiting start state: {}", state.id)
+        return accumulator
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun visit(state: EndState, accumulator: Accumulator) {
-        log.trace("Visiting a End State")
+    fun visit(state: EndState, accumulator: Accumulator): Accumulator {
+        log.trace("Visiting a end state: {}", state.id)
         log.trace("Should clean session...")
+        return accumulator
     }
 
-    fun visit(state: WaitForInputState, accumulator: Accumulator) {
+    fun visit(state: WaitForInputState, accumulator: Accumulator): Accumulator {
         log.trace("Visiting a wait for input")
         when (state.expectedValues) {
             is StaticExpectedValues -> accumulator.addMessage(choices = state.expectedValues.values)
+            is SessionExpectedValues -> {
+                // check if key is present
+                val key = state.expectedValues.key
+                if (key !in accumulator.context)
+                    throw ConversationServiceException("Session key '$key' is not present in context data")
+                // check if it a list or not
+                if (accumulator.context[key] !is List<*>)
+                    throw ConversationServiceException("Session key '$key' doesn't contain a List: '${accumulator.context[key]}' found")
+
+                accumulator.addMessage(choices = (accumulator.context[key] as List<*>).map { it.toString() })
+            }
         }
+        return accumulator
     }
 
-    fun visit(state: SendMexState, accumulator: Accumulator) {
+    fun visit(state: SendMexState, accumulator: Accumulator): Accumulator {
         log.trace("Visiting a send-mex")
         val mex = state.message
         val regex = ".*!\\{(.*)}.*".toRegex()
@@ -55,25 +68,33 @@ class ConversationService(
             if (regex.matches(mex)) {
                 log.trace("Found regexp match of session key in message")
                 val sessionParamName: String = regex.find(mex)!!.groupValues[1]
-                log.trace("Looking for param {} in session data: {}", sessionParamName, accumulator.session)
-                val sessionValue = accumulator.session[sessionParamName].toString()
+                log.trace("Looking for param {} in session data: {}", sessionParamName, accumulator.context)
+                val sessionValue = accumulator.context[sessionParamName].toString()
 
                 mex.replace("!{$sessionParamName}", sessionValue)
             } else mex
 
         log.trace("Adding message: {}", outputMex)
         accumulator.addMessage(text = outputMex)
+        return accumulator
     }
 
-    fun visit(visitable: BotState, accumulator: Accumulator) {
+    fun visit(visitable: BotState, accumulator: Accumulator): Accumulator {
         log.trace("Visiting a visitable of type: {}", visitable::class)
         try {
             val m: Method = this.javaClass.getMethod("visit", visitable::class.java, Accumulator::class.java)
             log.trace("Invoking method ${m.name} on object ${this::class.simpleName} with parameters types: ${visitable::class.simpleName}")
-            m.invoke(this, visitable, accumulator)
+            return m.invoke(this, visitable, accumulator) as Accumulator
+        } catch (ce: ConversationServiceException) {
+            log.warn("Got exception while visiting state: {}", visitable.id)
+            log.debug("Current accumulator: {}", accumulator)
+            log.debug("Current session: {}", accumulator.context.data)
+            log.trace("{}", ce)
+            throw ce
         } catch (e: Exception) {
             log.trace("{}", e)
             log.error("Error visiting type: ${visitable::class}: $e")
+            return accumulator
         }
     }
 
@@ -90,7 +111,6 @@ class ConversationService(
 
         // validate input
         // If input is != choices, return with same choices and on-mismatch input
-
         val inputCheck: InputCheck = checkInput(currentState, input.text)
         if (inputCheck.isNotValid()) {
             val okm: OutputKobotMessage = inputCheck.kobotMessage(chatId)
@@ -103,26 +123,30 @@ class ConversationService(
         // Update the Context accordingly to current state
         val context: SessionData = updateContext(currentState, memory.sessionData, input.text)
         // get all the states between current and next wait-for-input (or end)
-        val states: List<BotState> =
-            this.config.statesUntilWait(memory.state, listOf(message.input.text))
+        val states: List<BotState> = this.config.statesUntilWait(memory.state, listOf(message.input.text))
 
         // for each state, perform specific action
         // in case of messages, accumulate them
-        val acc = Accumulator(context)
-        for (state in states) {
-            this.visit(state, acc)
-        }
+        val acc: Accumulator = this.visit(states, context)
 
         val okm = OutputKobotMessage(
             chatId,
             acc.outputMessages,
             acc.choices
         )
-        val newMemory = MemoryData(states.last(), context)
+        val newMemory = MemoryData(states.last(), acc.context)
 
         val ocm = OutputConversationMessage(chatId, okm, newMemory)
         memoryService.handle(ocm)
         return
+    }
+
+    fun visit(states: List<BotState>, context: SessionData): Accumulator {
+        var acc = Accumulator(context)
+        for (state in states) {
+            acc = this.visit(state, acc)
+        }
+        return acc
     }
 
     fun updateContext(currentState: BotState, context: SessionData, input: String): SessionData {

@@ -5,7 +5,9 @@ import cloud.bernardinello.kobot.utils.OutputKobotMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class Accumulator(val session: SessionData) {
+class ConversationServiceException(msg: String) : Exception(msg)
+
+data class Accumulator(val context: SessionData) {
     companion object {
         val log: Logger = LoggerFactory.getLogger(Accumulator::class.java)
     }

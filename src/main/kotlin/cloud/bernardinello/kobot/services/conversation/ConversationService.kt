@@ -3,6 +3,7 @@ package cloud.bernardinello.kobot.services.conversation
 import cloud.bernardinello.kobot.conversation.*
 import cloud.bernardinello.kobot.services.memory.MemoryData
 import cloud.bernardinello.kobot.services.memory.MemoryService
+import cloud.bernardinello.kobot.services.memory.SessionData
 import cloud.bernardinello.kobot.utils.InputConversationMessage
 import cloud.bernardinello.kobot.utils.InputKobotMessage
 import cloud.bernardinello.kobot.utils.OutputConversationMessage
@@ -25,7 +26,6 @@ class ConversationService(
 
     fun visit(state: JdbcReadState, accumulator: Accumulator) {
         log.trace("Visiting a jdbc-read state")
-
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -80,56 +80,77 @@ class ConversationService(
     @Async
     fun handle(message: InputConversationMessage) {
         val memory: MemoryData = message.memory
+        val currentState = memory.state
         val input: InputKobotMessage = message.input
         val chatId = input.chatId
 
-        log.trace("Current state is: {}", memory.state.id)
+        log.trace("Current state is: {}", currentState.id)
         log.trace("Current session data are: {}", memory.sessionData)
         log.trace("Handling message: {}", input.text)
 
-        val inputCheck = InputChecker(memory, input)
+        // validate input
+        // If input is != choices, return with same choices and on-mismatch input
+
+        val inputCheck: InputCheck = checkInput(currentState, input.text)
         if (inputCheck.isNotValid()) {
-            log.trace("Choice not recognized: ${inputCheck.choices}")
-            val okm =
-                OutputKobotMessage(
-                    chatId,
-                    messages = listOf(inputCheck.message),
-                    choices = inputCheck.choices
-                )
+            val okm: OutputKobotMessage = inputCheck.kobotMessage(chatId)
             val ocm = OutputConversationMessage(chatId, okm, memory)
-//            return ocm
             memoryService.handle(ocm)
-        } else {
-            if (memory.state is WaitForInputState) {
-                log.trace("Checking session-field of this wait-for-input state")
-                val sessionField = memory.state.sessionField
-                if (memory.state.sessionField.isNotEmpty()) {
-                    log.trace("Adding {} to current session with key {}", input.text, sessionField)
-                    memory.sessionData[sessionField] = input.text
-                }
-            }
-
-            log.trace("Looking for next wait from: ${memory.state} with choices: ${listOf(message.input.text)}")
-            val states: List<BotState> =
-                this.config.statesUntilWait(memory.state, listOf(message.input.text))
-            log.trace("Traversing states: {}", states.map { "${it.id}:${it.type}" }.toList())
-
-            val acc = Accumulator(memory.sessionData)
-            for (state in states) {
-                this.visit(state, acc)
-            }
-
-            val okm = OutputKobotMessage(
-                chatId,
-                acc.outputMessages,
-                acc.choices
-            )
-            val newMemory = MemoryData(states.last(), memory.sessionData)
-
-            val ocm =
-                OutputConversationMessage(chatId, okm, newMemory)
-//            return ocm
-            memoryService.handle(ocm)
+            return
         }
+
+        // if input is correct
+        // Update the Context accordingly to current state
+        val context: SessionData = updateContext(currentState, memory.sessionData, input.text)
+        // get all the states between current and next wait-for-input (or end)
+        val states: List<BotState> =
+            this.config.statesUntilWait(memory.state, listOf(message.input.text))
+
+        // for each state, perform specific action
+        // in case of messages, accumulate them
+        val acc = Accumulator(context)
+        for (state in states) {
+            this.visit(state, acc)
+        }
+
+        val okm = OutputKobotMessage(
+            chatId,
+            acc.outputMessages,
+            acc.choices
+        )
+        val newMemory = MemoryData(states.last(), context)
+
+        val ocm = OutputConversationMessage(chatId, okm, newMemory)
+        memoryService.handle(ocm)
+        return
+    }
+
+    fun updateContext(currentState: BotState, context: SessionData, input: String): SessionData {
+        if (currentState is WaitForInputState) {
+            log.trace("Checking session-field of this wait-for-input state")
+            val sessionField = currentState.sessionField
+            if (currentState.sessionField.isNotEmpty()) {
+                log.trace("Adding {} to current session with key {}", input, sessionField)
+                context[sessionField] = input
+            }
+        }
+        return context
+    }
+
+    fun checkInput(state: BotState, input: String): InputCheck {
+        log.trace("Looking into: {} {}", state.id, state.type)
+
+        if (state is WaitForInputState) {
+            val expectedValues = state.expectedValues
+
+            if (expectedValues is StaticExpectedValues) {
+                log.trace("Got static values: {}", expectedValues)
+                if (!expectedValues.values.contains(input))
+                    return InputCheck(false, expectedValues.onMismatch, expectedValues.values)
+            } else
+                log.trace("Expected values is: {}. Unhandled for now", expectedValues::class.simpleName)
+        }
+        log.trace("Returning valid")
+        return InputCheck(valid = true)
     }
 }

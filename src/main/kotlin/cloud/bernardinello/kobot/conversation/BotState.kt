@@ -56,7 +56,7 @@ abstract class ExpectedValues(
     val type: String
 )
 
-class StaticExpectedValues(val values: List<String>, @JsonProperty("on-mismatch") val onMismatch: String) :
+data class StaticExpectedValues(val values: List<String>, @JsonProperty("on-mismatch") val onMismatch: String) :
     ExpectedValues(type = "static") {
     init {
         if (values.isEmpty())

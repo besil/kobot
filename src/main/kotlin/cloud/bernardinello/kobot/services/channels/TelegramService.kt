@@ -1,7 +1,6 @@
 package cloud.bernardinello.kobot.services.channels
 
 import cloud.bernardinello.kobot.conf.TelegramConfig
-import cloud.bernardinello.kobot.runner.TelegramRunner
 import cloud.bernardinello.kobot.services.transport.TransportService
 import cloud.bernardinello.kobot.utils.OutputKobotMessage
 import org.slf4j.LoggerFactory
@@ -33,7 +32,7 @@ class TelegramService(
         log.debug("Incoming message...")
         val chatId = update.message.chatId
         val message = update.message.text
-        TelegramRunner.log.trace("chat id: {} - {}", chatId, message)
+        log.trace("chat id: {} - {}", chatId, message)
         transportService.handle(chatId, message)
     }
 

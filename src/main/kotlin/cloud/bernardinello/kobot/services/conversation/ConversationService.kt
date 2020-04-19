@@ -11,6 +11,7 @@ import cloud.bernardinello.kobot.utils.OutputKobotMessage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import java.lang.reflect.Method
@@ -18,6 +19,7 @@ import java.lang.reflect.Method
 @Service
 class ConversationService(
     @Autowired val config: BotConfig,
+    @Autowired val jdbcTemplate: JdbcTemplate,
     @Lazy @Autowired val memoryService: MemoryService
 ) {
     companion object {
@@ -26,6 +28,12 @@ class ConversationService(
 
     fun visit(state: JdbcReadState, accumulator: Accumulator): Accumulator {
         log.trace("Visiting a jdbc-read state: {}", state.id)
+        val sessionKey = state.sessionField
+
+        val queryForList: List<Map<String, Any>> = jdbcTemplate.queryForList(state.query)
+        log.trace("Query list: {}", queryForList)
+        val values = queryForList.flatMap { it.values }
+        accumulator.context[sessionKey] = values
         return accumulator
     }
 
@@ -197,7 +205,7 @@ class ConversationService(
                     // do the actual check
                     val values = context[key] as List<*>
                     if (!values.contains(input))
-                        return InputCheck(false, "Error!", values.map { it.toString() })
+                        return InputCheck(false, expectedValues.onMismatch, values.map { it.toString() })
                 }
                 else -> log.trace("Expected values is: {}. Unhandled for now", expectedValues::class.simpleName)
             }

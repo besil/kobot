@@ -1,1 +1,3 @@
 application.properties
+data.sql
+schema.sql

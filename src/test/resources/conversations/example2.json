@@ -7,7 +7,7 @@
     {
       "id": "get-db",
       "type": "jdbc-read",
-      "query": "select * from foo",
+      "query": "select bar from foobar",
       "session-field": "db-data"
     },
     {
@@ -21,7 +21,8 @@
       "expected-type": "string",
       "expected-values": {
         "type": "session",
-        "key": "db-data"
+        "key": "db-data",
+        "on-mismatch": "Not a valid option! Try again"
       },
       "session-field": "choice"
     },

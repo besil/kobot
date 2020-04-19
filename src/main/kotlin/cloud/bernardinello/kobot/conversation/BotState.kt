@@ -109,7 +109,7 @@ class JdbcReadState(
         try {
             log.trace("Parsing query: $query")
             val select = CCJSqlParserUtil.parse(query) as Select
-            log.debug("Select body: {}", select.selectBody)
+            log.trace("Select body: {}", select.selectBody)
 
             if (query.startsWith("select *"))
                 throw ConversationServiceException(
@@ -123,9 +123,9 @@ class JdbcReadState(
                 }
             }
             tablesNamesFinder.getTableList(select)
-            log.debug("Columns list is: {}", columns)
+            log.trace("Columns list is: {}", columns)
             if (columns.size != 1) {
-                log.debug("Invalid column list")
+                log.trace("Invalid column list")
                 throw ConversationServiceException(
                     "Invalid query: '$query' provided for state: '$id' must have a single column return"
                 )

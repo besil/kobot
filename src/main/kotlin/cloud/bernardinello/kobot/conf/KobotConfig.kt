@@ -6,9 +6,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Paths
 import java.sql.Connection
 import java.sql.DriverManager
+import javax.sql.DataSource
+
 
 @Configuration
 class KobotConfig {
@@ -40,5 +43,9 @@ class KobotConfig {
     fun telegramConfig(@Value("\${bot.name}") name: String, @Value("\${bot.token}") token: String) =
         TelegramConfig(name, token)
 
+    @Bean
+    fun jdbcTemplate(dataSource: DataSource): JdbcTemplate? {
+        return JdbcTemplate(dataSource)
+    }
 
 }

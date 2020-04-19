@@ -26,7 +26,13 @@ class BotConfig(val states: List<BotState>, val relationships: List<BotStateRela
             is WaitForInputState -> {
                 log.trace("Handling a wait-forinput state")
                 val outEdges: Set<BotEdge> = graph.outgoingEdgesOf(node)
-                val edge: BotEdge = outEdges.first { it.relationship.onInput.containsAll(onInput) }
+
+                val edge: BotEdge = if (state.expectedValues is StaticExpectedValues)
+                    outEdges.first { it.relationship.onInput.containsAll(onInput) }
+                else
+                    outEdges.first()
+
+//                val edge: BotEdge = outEdges.first { it.relationship.onInput.containsAll(onInput) }
                 graph.getEdgeTarget(edge)
             }
             else -> {

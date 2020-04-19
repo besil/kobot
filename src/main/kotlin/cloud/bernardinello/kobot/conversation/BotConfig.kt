@@ -31,8 +31,6 @@ class BotConfig(val states: List<BotState>, val relationships: List<BotStateRela
                     outEdges.first { it.relationship.onInput.containsAll(onInput) }
                 else
                     outEdges.first()
-
-//                val edge: BotEdge = outEdges.first { it.relationship.onInput.containsAll(onInput) }
                 graph.getEdgeTarget(edge)
             }
             else -> {

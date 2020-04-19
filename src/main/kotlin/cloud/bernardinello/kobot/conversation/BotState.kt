@@ -1,14 +1,18 @@
 package cloud.bernardinello.kobot.conversation
 
+import cloud.bernardinello.kobot.services.conversation.ConversationServiceException
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import net.sf.jsqlparser.JSQLParserException
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
+import net.sf.jsqlparser.schema.Column
 import net.sf.jsqlparser.statement.Statement
 import net.sf.jsqlparser.statement.insert.Insert
 import net.sf.jsqlparser.statement.select.Select
 import net.sf.jsqlparser.statement.update.Update
+import net.sf.jsqlparser.util.TablesNamesFinder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -100,11 +104,41 @@ class JdbcReadState(
     init {
         if (sessionField == "")
             throw BotConfigException("Invalid session-field: '$sessionField' provided for state: '$id'")
+        if (query == "")
+            throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
         try {
             log.trace("Parsing query: $query")
-            CCJSqlParserUtil.parse(query) as Select
+            val select = CCJSqlParserUtil.parse(query) as Select
+            log.debug("Select body: {}", select.selectBody)
+
+            if (query.startsWith("select *"))
+                throw ConversationServiceException(
+                    "Invalid query: '$query' provided for state: '$id' must have a single column return"
+                )
+
+            val columns = mutableListOf<String>()
+            val tablesNamesFinder: TablesNamesFinder = object : TablesNamesFinder() {
+                override fun visit(tableColumn: Column) {
+                    columns.add(tableColumn.columnName)
+                }
+            }
+            tablesNamesFinder.getTableList(select)
+            log.debug("Columns list is: {}", columns)
+            if (columns.size != 1) {
+                log.debug("Invalid column list")
+                throw ConversationServiceException(
+                    "Invalid query: '$query' provided for state: '$id' must have a single column return"
+                )
+            }
+
         } catch (e: ClassCastException) {
+            log.trace("Query is not a select!")
             throw BotConfigException("Invalid query: '$query' provided for state: '$id' is not a select")
+        } catch (e: JSQLParserException) {
+            log.trace("Query is bad written!")
+            throw BotConfigException("Invalid query - SQL error: '$query' provided for state: '$id'")
+        } catch (e: ConversationServiceException) {
+            throw e
         } catch (e: Exception) {
             log.trace("{}", e)
             throw BotConfigException("Invalid query: '$query' provided for state: '$id'")

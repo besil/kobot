@@ -44,6 +44,30 @@ class JdbcReadStateTest : StringSpec() {
             }.message shouldContain "Invalid session-field: '' provided for state: 'read'"
         }
 
+        "a single column result should be expressed in the query" {
+            shouldThrow<BotConfigException> {
+                KobotParser.parse(
+                    """{
+                | "id": "read",
+                | "type": "jdbc-read",
+                | "query": "select * from foo",
+                | "session-field": "foo"
+                |}""".trimMargin()
+                ) as JdbcReadState
+            }.message shouldContain "Invalid query: 'select * from foo' provided for state: 'read' must have a single column return"
+
+            shouldThrow<BotConfigException> {
+                KobotParser.parse(
+                    """{
+                | "id": "read",
+                | "type": "jdbc-read",
+                | "query": "select a, b from foo",
+                | "session-field": "foo"
+                |}""".trimMargin()
+                ) as JdbcReadState
+            }.message shouldContain "Invalid query: 'select a, b from foo' provided for state: 'read' must have a single column return"
+        }
+
 
         "A jdbc-read state should have a valid sql query" {
             shouldThrow<BotConfigException> {
@@ -55,7 +79,7 @@ class JdbcReadStateTest : StringSpec() {
                 | "session-field": "foos"
                 |}""".trimMargin()
                 ) as JdbcReadState
-            }.message shouldContain "Invalid query: 'select * from' provided for state: 'read'"
+            }.message shouldContain "Invalid query - SQL error: 'select * from' provided for state: 'read'"
 
             shouldThrow<BotConfigException> {
                 KobotParser.parse(
@@ -66,7 +90,7 @@ class JdbcReadStateTest : StringSpec() {
                 | "session-field": "foos"
                 |}""".trimMargin()
                 ) as JdbcReadState
-            }.message shouldContain "Invalid query: 'select * from foo groupby asd' provided for state: 'read'"
+            }.message shouldContain "Invalid query - SQL error: 'select * from foo groupby asd' provided for state: 'read'"
         }
 
         "Only select query should be accepted" {

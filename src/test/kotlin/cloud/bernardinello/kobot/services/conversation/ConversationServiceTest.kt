@@ -62,12 +62,7 @@ class ConversationServiceTest : StringSpec() {
 
             shouldThrow<ConversationServiceException> {
                 conversationService.checkInput(wfi, context, "hello")
-            }.message shouldContain "Session keys ['foo'] are not present in context data"
-
-//            val inputCheck: InputCheck = conversationService.checkInput(wfi, context, "hello")
-//            inputCheck.valid shouldBe false
-//            inputCheck.message shouldBe "Error!"
-//            inputCheck.choices shouldBe listOf("ciao", "mondo")
+            }.message shouldContain "Session keys ['foo'] not found in current context"
         }
 
         "checkInput on session expected values should throw exception if key is not a list of elements" {
@@ -139,7 +134,7 @@ class ConversationServiceTest : StringSpec() {
             val context = SessionData()
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(context))
-            }.message shouldContain "Session keys [world] are not present in context data"
+            }.message shouldContain "Session keys [world] not found in current context"
 
             context.set("world", "foo")
             val acc = conversationService.visit(state, Accumulator(context))
@@ -156,12 +151,12 @@ class ConversationServiceTest : StringSpec() {
             val context = SessionData()
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(context))
-            }.message shouldContain "Session keys [greet, someone] are not present in context data"
+            }.message shouldContain "Session keys [greet, someone] not found in current context"
 
             context["greet"] = "hello"
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(context))
-            }.message shouldContain "Session keys [someone] are not present in context data"
+            }.message shouldContain "Session keys [someone] not found in current context"
 
             context["someone"] = "world"
             val acc = conversationService.visit(state, Accumulator(context))
@@ -202,7 +197,7 @@ class ConversationServiceTest : StringSpec() {
             )
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(SessionData()))
-            }.message shouldContain "Session keys ['foo'] are not present in context data"
+            }.message shouldContain "Session keys ['foo'] not found in current context"
         }
 
         "a session wait-for-input expected values must be a collection" {
@@ -253,7 +248,7 @@ class ConversationServiceTest : StringSpec() {
             val conversationService = ConversationService(config, jdbc, memoryService)
             val state = JdbcReadState(
                 id = "read",
-                query = "select a from foo where chatid=?",
+                query = "select a from foo where chatid=!{chatId}",
                 sessionField = "result"
             )
 
@@ -268,6 +263,20 @@ class ConversationServiceTest : StringSpec() {
             verify {
                 jdbc.queryForList("select a from foo where chatid=5")
             }
+        }
+
+        "jdbc-read should throw exception if session-key is not found" {
+            val jdbc = mockk<JdbcTemplate>()
+            val conversationService = ConversationService(config, jdbc, memoryService)
+            val state = JdbcReadState(
+                id = "read",
+                query = "select a from foo where chatid=!{foobar} and foo=!{bar}",
+                sessionField = "result"
+            )
+            val sd = SessionData()
+            shouldThrow<ConversationServiceException> {
+                conversationService.visit(state, Accumulator(sd))
+            }.message shouldContain "Session keys [bar, foobar] not found in current context"
         }
     }
 }

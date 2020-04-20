@@ -7,13 +7,13 @@
     {
       "id": "get-db",
       "type": "jdbc-read",
-      "query": "select bar from foobar",
+      "query": "select foo from foobar",
       "session-field": "db-data"
     },
     {
       "id": "info-retrieved",
       "type": "send-mex",
-      "message": "Retrieved data from db"
+      "message": "Choose a content"
     },
     {
       "id": "show-retrieved",
@@ -30,6 +30,17 @@
       "id": "show-choice",
       "type": "send-mex",
       "message": "You choose: !{choice}"
+    },
+    {
+      "id": "get-content",
+      "type": "jdbc-read",
+      "query": "select bar from foobar where foo=!{choice}",
+      "session-field": "db-data"
+    },
+    {
+      "id": "show-value",
+      "type": "send-mex",
+      "message": "Your value of choice is: !{db-data}"
     },
     {
       "id": "end",
@@ -55,6 +66,14 @@
     },
     {
       "from": "show-choice",
+      "to": "get-content"
+    },
+    {
+      "from": "get-content",
+      "to": "show-value"
+    },
+    {
+      "from": "show-value",
       "to": "end"
     }
   ]

@@ -28,9 +28,13 @@ class ConversationService(
 
     fun visit(state: JdbcReadState, accumulator: Accumulator): Accumulator {
         log.trace("Visiting a jdbc-read state: {}", state.id)
+        val context = accumulator.context
         val sessionKey = state.sessionField
 
-        val queryForList: List<Map<String, Any>> = jdbcTemplate.queryForList(state.query)
+        val sessionKeys = extractSessionKeys(state.query)
+        val sql = replaceSessionKeys(state.query, sessionKeys, context)
+
+        val queryForList: List<Map<String, Any>> = jdbcTemplate.queryForList(sql)
         log.trace("Query list: {}", queryForList)
         val values = queryForList.flatMap { it.values }
         accumulator.context[sessionKey] = values
@@ -51,16 +55,20 @@ class ConversationService(
     fun visit(state: WaitForInputState, accumulator: Accumulator): Accumulator {
         log.trace("Visiting a wait for input")
         when (state.expectedValues) {
-            is StaticExpectedValues -> accumulator.addMessage(choices = state.expectedValues.values)
+            is StaticExpectedValues -> {
+                log.trace("Expected values: ${state.expectedValues.values}")
+                accumulator.addMessage(choices = state.expectedValues.values)
+            }
             is SessionExpectedValues -> {
                 // check if key is present
                 val key = state.expectedValues.key
+                log.trace("Looking expected values key: $key")
                 if (key !in accumulator.context)
-                    throw ConversationServiceException("Session keys ['$key'] are not present in context data")
+                    throw ConversationServiceException("Session keys ['$key'] not found in current context")
                 // check if it a list or not
                 if (accumulator.context[key] !is List<*>)
                     throw ConversationServiceException("Session key '$key' doesn't contain a List: '${accumulator.context[key]}' found")
-
+                log.trace("Expected values: ${accumulator.context[key]}")
                 accumulator.addMessage(choices = (accumulator.context[key] as List<*>).map { it.toString() })
             }
         }
@@ -84,21 +92,27 @@ class ConversationService(
         val context = accumulator.context
 
         val keys = extractSessionKeys(mex)
-        val missingSessionKeys = keys.filter { !context.contains(it) }.toList().sorted()
 
+
+        val outputMex = replaceSessionKeys(mex, keys, context)
+
+        log.trace("Adding message: {}", outputMex)
+        accumulator.addMessage(text = outputMex)
+        return accumulator
+    }
+
+    private fun replaceSessionKeys(mex: String, keys: List<String>, context: SessionData): String {
+        val missingSessionKeys = keys.filter { !context.contains(it) }.toList().sorted()
         if (missingSessionKeys.isNotEmpty()) {
             log.trace("Missing keys: {}", missingSessionKeys)
-            throw ConversationServiceException("Session keys $missingSessionKeys are not present in context data")
+            throw ConversationServiceException("Session keys $missingSessionKeys not found in current context")
         }
 
         var outputMex = mex
         keys.forEach {
             outputMex = outputMex.replace("!{$it}", context[it].toString())
         }
-
-        log.trace("Adding message: {}", outputMex)
-        accumulator.addMessage(text = outputMex)
-        return accumulator
+        return outputMex
     }
 
     fun visit(visitable: BotState, accumulator: Accumulator): Accumulator {
@@ -192,18 +206,18 @@ class ConversationService(
             when (expectedValues) {
                 is StaticExpectedValues -> {
                     log.trace("Got static values: {}", expectedValues)
-                    if (!expectedValues.values.contains(input))
+                    if (!expectedValues.values.map { it.toString() }.contains(input))
                         return InputCheck(false, expectedValues.onMismatch, expectedValues.values)
                 }
                 is SessionExpectedValues -> {
                     val key = expectedValues.key
                     if (!context.contains(key))
-                        throw ConversationServiceException("Session keys ['$key'] are not present in context data")
+                        throw ConversationServiceException("Session keys ['$key'] not found in current context")
                     if (context[key] !is List<*>)
                         throw ConversationServiceException("Session key '$key' doesn't contain a List: '${context[key]}' found")
 
                     // do the actual check
-                    val values = context[key] as List<*>
+                    val values = (context[key] as List<*>).map { it.toString() }
                     if (!values.contains(input))
                         return InputCheck(false, expectedValues.onMismatch, values.map { it.toString() })
                 }

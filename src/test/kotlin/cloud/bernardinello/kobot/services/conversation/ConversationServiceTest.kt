@@ -18,15 +18,6 @@ class ConversationServiceTest : StringSpec() {
         val log = LoggerFactory.getLogger(ConversationServiceTest::class.java)
     }
 
-//    @AnnotationSpec.BeforeEach
-//    fun beforeTest(testCase: TestCase) {
-//        log.info(
-//            "\n-----------------------------\n" +
-//                    "Running test: ${testCase.name}\n" +
-//                    "-----------------------------\n"
-//        )
-//    }
-
     init {
         val config = mockk<BotConfig>(relaxUnitFun = true)
         val memoryService = mockk<MemoryService>(relaxUnitFun = true)

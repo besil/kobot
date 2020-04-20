@@ -47,7 +47,9 @@ class InMemoryService(
         log.trace("Receiving {}", message)
         if (!cache.containsKey(message.chatId)) {
             log.trace("Create new session for ${message.chatId}")
-            cache[message.chatId] = MemoryData(startState, SessionData())
+            val sd = SessionData()
+            sd["chatId"] = message.chatId
+            cache[message.chatId] = MemoryData(startState, sd)
         }
         val input = InputConversationMessage(
             message.chatId,

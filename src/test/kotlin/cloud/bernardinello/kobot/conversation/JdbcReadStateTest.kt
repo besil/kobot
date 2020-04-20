@@ -3,6 +3,7 @@ package cloud.bernardinello.kobot.conversation
 import cloud.bernardinello.kobot.utils.KobotParser
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.slf4j.LoggerFactory
 
@@ -74,7 +75,7 @@ class JdbcReadStateTest : StringSpec() {
                 | "session-field": "foos"
                 |}""".trimMargin()
                 ) as JdbcReadState
-            }.message shouldContain "Invalid query - SQL error: 'select * from' provided for state: 'read'"
+            }.message shouldContain "Invalid query: 'select * from' provided for state: 'read' must have a single column return"
 
             shouldThrow<BotConfigException> {
                 KobotParser.parse(
@@ -85,7 +86,7 @@ class JdbcReadStateTest : StringSpec() {
                 | "session-field": "foos"
                 |}""".trimMargin()
                 ) as JdbcReadState
-            }.message shouldContain "Invalid query - SQL error: 'select * from foo groupby asd' provided for state: 'read'"
+            }.message shouldContain "Invalid query: 'select * from foo groupby asd' provided for state: 'read' must have a single column return"
         }
 
         "Only select query should be accepted" {
@@ -110,6 +111,23 @@ class JdbcReadStateTest : StringSpec() {
                 |}""".trimMargin()
                 ) as JdbcReadState
             }.message shouldContain "Invalid query: 'update foo set foo='bar' where userid='!{chatId}'' provided for state: 'read' is not a select"
+        }
+
+        "extractSelectNames should return only column names" {
+            val state = JdbcReadState(
+                "read",
+                query = "select a from foo",
+                sessionField = "key"
+            )
+            state.extractSelectNames("select a from foo") shouldBe listOf("a")
+            state.extractSelectNames("select a from foo where chatId=5") shouldBe listOf("a")
+            state.extractSelectNames("select a from foo where chatId=:chatId") shouldBe listOf("a")
+            state.extractSelectNames("select a from foo where chatId=!{chatId}") shouldBe listOf("a")
+
+            state.extractSelectNames("select a,b from foo") shouldBe listOf("a", "b")
+            state.extractSelectNames("select a,b from foo where chatId=5") shouldBe listOf("a", "b")
+            state.extractSelectNames("select a,b from foo where chatId=?") shouldBe listOf("a", "b")
+            state.extractSelectNames("select a,b from foo where chatId=:chatId") shouldBe listOf("a", "b")
         }
     }
 }

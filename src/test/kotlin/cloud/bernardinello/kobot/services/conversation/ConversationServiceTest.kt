@@ -9,6 +9,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 
@@ -245,6 +246,28 @@ class ConversationServiceTest : StringSpec() {
 
             val acc = conversationService.visit(state, Accumulator(SessionData()))
             acc.context["result"] shouldBe listOf(1, 2, 3)
+        }
+
+        "jdbc-read should be able to use session-data" {
+            val jdbc = mockk<JdbcTemplate>()
+            val conversationService = ConversationService(config, jdbc, memoryService)
+            val state = JdbcReadState(
+                id = "read",
+                query = "select a from foo where chatid=?",
+                sessionField = "result"
+            )
+
+            val rows: List<Map<String, Any>> = listOf(mapOf("a" to 1), mapOf("a" to 2), mapOf("a" to 3))
+            every { jdbc.queryForList("select a from foo where chatid=5") } returns rows
+
+            val sd = SessionData()
+            sd["chatId"] = 5
+            val acc = conversationService.visit(state, Accumulator(sd))
+            acc.context["result"] shouldBe listOf(1, 2, 3)
+
+            verify {
+                jdbc.queryForList("select a from foo where chatid=5")
+            }
         }
     }
 }

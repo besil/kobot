@@ -7,12 +7,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.sf.jsqlparser.JSQLParserException
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
-import net.sf.jsqlparser.schema.Column
 import net.sf.jsqlparser.statement.Statement
 import net.sf.jsqlparser.statement.insert.Insert
+import net.sf.jsqlparser.statement.select.PlainSelect
 import net.sf.jsqlparser.statement.select.Select
 import net.sf.jsqlparser.statement.update.Update
-import net.sf.jsqlparser.util.TablesNamesFinder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -108,21 +107,14 @@ class JdbcReadState(
             throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
         try {
             log.trace("Parsing query: $query")
-            val select = CCJSqlParserUtil.parse(query) as Select
-            log.trace("Select body: {}", select.selectBody)
+
 
             if (query.startsWith("select *"))
                 throw ConversationServiceException(
                     "Invalid query: '$query' provided for state: '$id' must have a single column return"
                 )
 
-            val columns = mutableListOf<String>()
-            val tablesNamesFinder: TablesNamesFinder = object : TablesNamesFinder() {
-                override fun visit(tableColumn: Column) {
-                    columns.add(tableColumn.columnName)
-                }
-            }
-            tablesNamesFinder.getTableList(select)
+            val columns = extractSelectNames(query)
             log.trace("Columns list is: {}", columns)
             if (columns.size != 1) {
                 log.trace("Invalid column list")
@@ -143,6 +135,29 @@ class JdbcReadState(
             log.trace("{}", e)
             throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
         }
+    }
+
+    fun extractSelectNames(s: String): List<String> {
+        val regex = """!\{(.*?)\}""".toRegex()
+        val sql = s.replace(regex, "?")
+        log.trace("Looking select columns from: $sql")
+        val selectStatement = CCJSqlParserUtil.parse(sql) as Select
+        log.trace("Select body: {}", selectStatement.selectBody)
+        log.trace("Is plain select? {}", selectStatement.selectBody is PlainSelect)
+
+        val select = selectStatement.selectBody as PlainSelect
+        log.trace("{}", select.selectItems)
+        log.trace("{}", select.selectItems.map { it.toString() })
+        return select.selectItems.map { it.toString() }
+
+//        val columns = mutableListOf<String>()
+//        val tablesNamesFinder: TablesNamesFinder = object : TablesNamesFinder() {
+//            override fun visit(tableColumn: Column) {
+//                columns.add(tableColumn.columnName)
+//            }
+//        }
+//        tablesNamesFinder.getTableList(select)
+//        return columns
     }
 }
 

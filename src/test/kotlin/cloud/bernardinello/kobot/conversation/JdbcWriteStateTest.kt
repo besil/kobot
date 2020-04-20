@@ -1,10 +1,9 @@
 package cloud.bernardinello.kobot.conversation
 
 import cloud.bernardinello.kobot.utils.KobotParser
-import io.kotlintest.TestCase
-import io.kotlintest.matchers.string.shouldContain
-import io.kotlintest.shouldThrow
-import io.kotlintest.specs.StringSpec
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.string.shouldContain
 import org.slf4j.LoggerFactory
 
 class JdbcWriteStateTest : StringSpec() {
@@ -12,9 +11,9 @@ class JdbcWriteStateTest : StringSpec() {
         val log = LoggerFactory.getLogger(JdbcWriteStateTest::class.java)
     }
 
-    override fun beforeTest(testCase: TestCase) {
-        log.info("Running test: ${testCase.name}")
-    }
+//    override fun beforeTest(testCase: TestCase) {
+//        log.info("Running test: ${testCase.name}")
+//    }
 
     init {
         "A jdbc-write state can't have empty query" {

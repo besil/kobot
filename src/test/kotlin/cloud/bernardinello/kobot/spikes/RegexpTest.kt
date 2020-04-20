@@ -1,9 +1,8 @@
 package cloud.bernardinello.kobot.spikes
 
 import cloud.bernardinello.kobot.services.conversation.ConversationServiceTest
-import io.kotlintest.TestCase
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.StringSpec
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import org.slf4j.LoggerFactory
 
 class RegexpTest : StringSpec() {
@@ -12,17 +11,17 @@ class RegexpTest : StringSpec() {
         val log = LoggerFactory.getLogger(ConversationServiceTest::class.java)
     }
 
-    override fun beforeTest(testCase: TestCase) {
-        log.info(
-            "\n-----------------------------\n" +
-                    "Running test: ${testCase.name}\n" +
-                    "-----------------------------".trimIndent()
-        )
-    }
+//    override fun beforeTest(testCase: TestCase) {
+//        log.info(
+//            "\n-----------------------------\n" +
+//                    "Running test: ${testCase.name}\n" +
+//                    "-----------------------------".trimIndent()
+//        )
+//    }
 
     init {
         "Kotlin regexp" {
-//            val s = "hello $[whof] world"
+            //            val s = "hello $[whof] world"
             val s = "hello world"
             val regexp = "(.*)world".toRegex()
 

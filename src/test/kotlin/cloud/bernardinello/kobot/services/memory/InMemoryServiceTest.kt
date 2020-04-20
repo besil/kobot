@@ -8,8 +8,8 @@ import cloud.bernardinello.kobot.services.transport.TransportService
 import cloud.bernardinello.kobot.utils.InputKobotMessage
 import cloud.bernardinello.kobot.utils.OutputConversationMessage
 import cloud.bernardinello.kobot.utils.OutputKobotMessage
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.StringSpec
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 

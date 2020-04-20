@@ -1,7 +1,7 @@
 package cloud.bernardinello.kobot.spikes
 
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.StringSpec
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import org.jgrapht.Graph
 import org.jgrapht.alg.connectivity.ConnectivityInspector
 import org.jgrapht.alg.connectivity.KosarajuStrongConnectivityInspector

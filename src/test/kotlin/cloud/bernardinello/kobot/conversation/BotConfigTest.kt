@@ -1,23 +1,18 @@
 package cloud.bernardinello.kobot.conversation
 
 import cloud.bernardinello.kobot.utils.KobotParser
-import io.kotlintest.TestCase
-import io.kotlintest.matchers.instanceOf
-import io.kotlintest.matchers.string.shouldContain
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
-import io.kotlintest.shouldThrow
-import io.kotlintest.specs.StringSpec
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.instanceOf
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class BotConfigTest : StringSpec() {
     companion object {
         val log: Logger = LoggerFactory.getLogger(BotConfigTest::class.java)
-    }
-
-    override fun beforeTest(testCase: TestCase) {
-        log.info("Running test: ${testCase.name}")
     }
 
     init {

@@ -9,11 +9,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.kotlintest.TestCase
-import io.kotlintest.matchers.instanceOf
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldThrow
-import io.kotlintest.specs.StringSpec
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.instanceOf
+import io.kotest.matchers.shouldBe
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KFunction
@@ -27,14 +26,15 @@ class CustomDeserializerTest : StringSpec() {
         val log: Logger = LoggerFactory.getLogger(CustomDeserializerTest::class.java)
     }
 
-    override fun beforeTest(testCase: TestCase) {
-        log.info("Running test: ${testCase.name}")
-    }
+//    override fun beforeTest(testCase: TestCase) {
+//        log.info("Running test: ${testCase.name}")
+//    }
 
     val om: ObjectMapper = jacksonObjectMapper()
 
     @JsonDeserialize(using = FooBarDeserializer::class)
     abstract class FooBar(val type: String)
+
     class Foo(val foo: String) : FooBar(type = "foo")
     class Bar(val bar: Int, val z: Double) : FooBar(type = "bar")
 

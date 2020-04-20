@@ -3,11 +3,10 @@ package cloud.bernardinello.kobot.services.conversation
 import cloud.bernardinello.kobot.conversation.*
 import cloud.bernardinello.kobot.services.memory.MemoryService
 import cloud.bernardinello.kobot.services.memory.SessionData
-import io.kotlintest.TestCase
-import io.kotlintest.matchers.string.shouldContain
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldThrow
-import io.kotlintest.specs.StringSpec
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
 import org.slf4j.LoggerFactory
@@ -19,13 +18,14 @@ class ConversationServiceTest : StringSpec() {
         val log = LoggerFactory.getLogger(ConversationServiceTest::class.java)
     }
 
-    override fun beforeTest(testCase: TestCase) {
-        log.info(
-            "\n-----------------------------\n" +
-                    "Running test: ${testCase.name}\n" +
-                    "-----------------------------\n"
-        )
-    }
+//    @AnnotationSpec.BeforeEach
+//    fun beforeTest(testCase: TestCase) {
+//        log.info(
+//            "\n-----------------------------\n" +
+//                    "Running test: ${testCase.name}\n" +
+//                    "-----------------------------\n"
+//        )
+//    }
 
     init {
         val config = mockk<BotConfig>(relaxUnitFun = true)

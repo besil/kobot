@@ -18,7 +18,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
         <spring.boot.version>2.2.5.RELEASE</spring.boot.version>
-        <kotest.version>3.4.2</kotest.version>
+        <kotest.version>4.0.3</kotest.version>
         <jackson.version>2.10.3</jackson.version>
     </properties>
 
@@ -118,14 +118,26 @@
 
         <!-- Testing libraries -->
         <dependency>
-            <groupId>io.kotlintest</groupId>
-            <artifactId>kotlintest-runner-junit5</artifactId>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-runner-junit5-jvm</artifactId>
             <version>${kotest.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.kotlintest</groupId>
-            <artifactId>kotlintest-extensions-spring</artifactId>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-core-jvm</artifactId>
+            <version>${kotest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-property-jvm</artifactId>
+            <version>${kotest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-extensions-spring-jvm</artifactId>
             <version>${kotest.version}</version>
             <scope>test</scope>
         </dependency>

@@ -355,9 +355,9 @@ class BotConfigTest : StringSpec() {
                     |       "id": "wti", 
                     |       "type": "wait-for-input", 
                     |       "expected-type": "string",
+                    |       "on-mismatch": "error on input. choices are:",
                     |       "expected-values": {
                     |           "type": "static",
-                    |           "on-mismatch": "error on input. choices are:",
                     |           "values": ["foo", "bar"]
                     |       },
                     |       "session-field": "s"
@@ -383,9 +383,9 @@ class BotConfigTest : StringSpec() {
                     |       "id": "wti", 
                     |       "type": "wait-for-input", 
                     |       "expected-type": "string",
+                    |       "on-mismatch": "error on input. choices are:",
                     |       "expected-values": {
                     |           "type": "static",
-                    |           "on-mismatch": "error on input. choices are:",
                     |           "values": ["foo", "bar"]
                     |       },
                     |       "session-field": "s"
@@ -412,9 +412,9 @@ class BotConfigTest : StringSpec() {
                 |       "id": "wti", 
                 |       "type": "wait-for-input", 
                 |       "expected-type": "string",
+                |       "on-mismatch": "error on input. choices are:",
                 |       "expected-values": {
                 |           "type": "static",
-                |           "on-mismatch": "error on input. choices are:",
                 |           "values": ["foo", "bar"]
                 |       },
                 |       "session-field": "s"
@@ -441,9 +441,9 @@ class BotConfigTest : StringSpec() {
                     |       "id": "wti", 
                     |       "type": "wait-for-input", 
                     |       "expected-type": "string",
+                    |       "on-mismatch": "error on input. choices are:",
                     |       "expected-values": {
                     |           "type": "static",
-                    |           "on-mismatch": "error on input. choices are:",
                     |           "values": ["a", "b", "c"]
                     |       },
                     |       "session-field": "s"
@@ -471,9 +471,9 @@ class BotConfigTest : StringSpec() {
                     |       "id": "wti", 
                     |       "type": "wait-for-input", 
                     |       "expected-type": "string",
+                    |       "on-mismatch": "error on input. choices are:",
                     |       "expected-values": {
                     |           "type": "static",
-                    |           "on-mismatch": "error on input. choices are:",
                     |           "values": ["a", "b", "c", "d"]
                     |       },
                     |       "session-field": "s"
@@ -503,9 +503,9 @@ class BotConfigTest : StringSpec() {
                     |       "id": "wti", 
                     |       "type": "wait-for-input", 
                     |       "expected-type": "string",
+                    |       "on-mismatch": "error on input. choices are:",
                     |       "expected-values": {
                     |           "type": "static",
-                    |           "on-mismatch": "error on input. choices are:",
                     |           "values": ["a", "b"]
                     |       },
                     |       "session-field": "s"
@@ -535,9 +535,9 @@ class BotConfigTest : StringSpec() {
                     |       "id": "wti", 
                     |       "type": "wait-for-input", 
                     |       "expected-type": "string",
+                    |       "on-mismatch": "error on input. choices are:",
                     |       "expected-values": {
                     |           "type": "static",
-                    |           "on-mismatch": "error on input. choices are:",
                     |           "values": ["a", "b"]
                     |       },
                     |       "session-field": "s"
@@ -569,9 +569,9 @@ class BotConfigTest : StringSpec() {
                     |       "id": "wti", 
                     |       "type": "wait-for-input", 
                     |       "expected-type": "string",
+                    |       "on-mismatch": "error on input. choices are:",
                     |       "expected-values": {
                     |           "type": "static",
-                    |           "on-mismatch": "error on input. choices are:",
                     |           "values": ["a", "b"]
                     |       },
                     |       "session-field": "s"

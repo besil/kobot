@@ -37,7 +37,8 @@ class ConversationServiceTest : StringSpec() {
             val wfi = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
-                expectedValues = StaticExpectedValues(listOf("ciao", "mondo"), "Error!")
+                onMismatch = "Error!",
+                expectedValues = StaticExpectedValues(listOf("ciao", "mondo"))
             )
             val inputCheck: InputCheck = conversationService.checkInput(wfi, context, "hello")
             inputCheck.valid shouldBe false
@@ -56,7 +57,8 @@ class ConversationServiceTest : StringSpec() {
             val wfi = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
-                expectedValues = SessionExpectedValues(key = "foo", onMismatch = "error")
+                expectedValues = SessionExpectedValues(key = "foo"),
+                onMismatch = "error"
             )
             val context = SessionData()
 
@@ -71,7 +73,8 @@ class ConversationServiceTest : StringSpec() {
             val wfi = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
-                expectedValues = SessionExpectedValues(key = "foo", onMismatch = "Error!")
+                expectedValues = SessionExpectedValues(key = "foo"),
+                onMismatch = "Error!"
             )
 
             val context = SessionData()
@@ -98,7 +101,8 @@ class ConversationServiceTest : StringSpec() {
             val wfi = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
-                expectedValues = StaticExpectedValues(listOf("ciao", "mondo"), "Error!"),
+                onMismatch = "Error!",
+                expectedValues = StaticExpectedValues(listOf("ciao", "mondo")),
                 sessionField = "foo"
             )
 
@@ -172,9 +176,9 @@ class ConversationServiceTest : StringSpec() {
                     id = "wfi",
                     expectedType = "string",
                     expectedValues = StaticExpectedValues(
-                        values = listOf("yes", "no"),
-                        onMismatch = "error"
+                        values = listOf("yes", "no")
                     ),
+                    onMismatch = "error",
                     sessionField = "foo"
                 )
             )
@@ -190,9 +194,9 @@ class ConversationServiceTest : StringSpec() {
             val state = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
+                onMismatch = "error",
                 expectedValues = SessionExpectedValues(
-                    key = "foo",
-                    onMismatch = "error"
+                    key = "foo"
                 )
             )
             shouldThrow<ConversationServiceException> {
@@ -205,9 +209,9 @@ class ConversationServiceTest : StringSpec() {
             val state = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
+                onMismatch = "error",
                 expectedValues = SessionExpectedValues(
-                    key = "foo",
-                    onMismatch = "error"
+                    key = "foo"
                 )
             )
 

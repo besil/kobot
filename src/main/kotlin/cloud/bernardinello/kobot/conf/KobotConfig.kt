@@ -44,7 +44,7 @@ class KobotConfig {
         TelegramConfig(name, token)
 
     @Bean
-    fun jdbcTemplate(dataSource: DataSource): JdbcTemplate? {
+    fun jdbcTemplate(dataSource: DataSource): JdbcTemplate {
         return JdbcTemplate(dataSource)
     }
 

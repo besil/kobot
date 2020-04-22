@@ -59,25 +59,23 @@ abstract class ExpectedValues(
     val type: String
 )
 
-data class StaticExpectedValues(val values: List<String>, @JsonProperty("on-mismatch") val onMismatch: String) :
+data class StaticExpectedValues(val values: List<String>) :
     ExpectedValues(type = "static") {
     init {
         if (values.isEmpty())
             throw BotConfigException("A static expected-values type can't have [] values")
-        if (onMismatch.isEmpty())
-            throw BotConfigException("A static expected-values on-mismatch can't be empty")
     }
 }
 
 class AnyExpectedValues : ExpectedValues(type = "any")
 
-class SessionExpectedValues(val key: String, @JsonProperty("on-mismatch") val onMismatch: String) :
+data class SessionExpectedValues(val key: String) :
     ExpectedValues(type = "session") {
     init {
         if (key == "")
             throw BotConfigException("A session expected-values type can't have empty key")
-        if (onMismatch.isEmpty())
-            throw BotConfigException("A session expected-values on-mismatch can't be empty")
+//        if (onMismatch.isEmpty())
+//            throw BotConfigException("A session expected-values on-mismatch can't be empty")
     }
 }
 
@@ -85,13 +83,15 @@ class WaitForInputState(
     id: String,
     @JsonProperty("expected-type") val expectedType: String,
     @JsonProperty("expected-values") val expectedValues: ExpectedValues,
+    @JsonProperty("on-mismatch") val onMismatch: String,
     @JsonProperty("session-field") val sessionField: String = ""
 ) : BotState(id, type = "wait-for-input") {
     init {
         val availableExpectedTypes = listOf("number", "string").sorted()
-
         if (expectedType !in availableExpectedTypes)
             throw BotConfigException("Invalid expected-type '$expectedType'. Valid values are: $availableExpectedTypes")
+        if (onMismatch.isEmpty())
+            throw BotConfigException("A static expected-values on-mismatch can't be empty")
     }
 }
 

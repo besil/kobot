@@ -233,12 +233,11 @@ class BotStateTest : StringSpec() {
                 KobotParser.parse(
                     """{
                 |"type": "session",
-                |"key": "session-field",
-                |"on-mismatch": "error"
+                |"key": "session-field"
                 |}""".trimMargin()
                 )
             sessionExpectedValues.key shouldBe "session-field"
-            sessionExpectedValues.onMismatch shouldBe "error"
+//            sessionExpectedValues.onMismatch shouldBe "error"
         }
 
         "A wait-for-input state" {
@@ -247,9 +246,9 @@ class BotStateTest : StringSpec() {
                 |"id": "get-confirm",
                 |"type": "wait-for-input",
                 |"expected-type": "string",
+                |"on-mismatch": "Input not matched. Please use one of the following:",
                 |"expected-values": {
                 |   "type": "static",
-                |   "on-mismatch": "Input not matched. Please use one of the following:",
                 |   "values": [ "Yes", "No" ]
                 |}
                 |}""".trimMargin()
@@ -258,12 +257,12 @@ class BotStateTest : StringSpec() {
             waitForInput.id shouldBe "get-confirm"
             waitForInput.type shouldBe "wait-for-input"
             waitForInput.expectedType shouldBe "string"
+            waitForInput.onMismatch shouldBe "Input not matched. Please use one of the following:"
             waitForInput.expectedValues shouldBe instanceOf(ExpectedValues::class)
             waitForInput.expectedValues.type shouldBe "static"
             waitForInput.expectedValues shouldBe instanceOf(StaticExpectedValues::class)
             waitForInput.expectedValues as StaticExpectedValues
             (waitForInput.expectedValues as StaticExpectedValues).values shouldBe listOf("Yes", "No")
-            (waitForInput.expectedValues as StaticExpectedValues).onMismatch shouldBe "Input not matched. Please use one of the following:"
         }
 
         "A wait-for-input state can have or not a session-field set" {
@@ -272,6 +271,7 @@ class BotStateTest : StringSpec() {
                 |"id": "get-confirm",
                 |"type": "wait-for-input",
                 |"expected-type": "number",
+                |"on-mismatch": "error",
                 |"expected-values": {
                 |   "type": "any"
                 |},
@@ -287,6 +287,7 @@ class BotStateTest : StringSpec() {
                 |"id": "get-confirm",
                 |"type": "wait-for-input",
                 |"expected-type": "number",
+                |"on-mismatch": "error",
                 |"expected-values": {
                 |   "type": "any"
                 |}
@@ -304,6 +305,7 @@ class BotStateTest : StringSpec() {
                         "id": "get-confirm",
                         "type": "wait-for-input",
                         "expected-type": "$type",
+                        "on-mismatch": "error!",
                         "expected-values": {
                            "type": "any"
                         }

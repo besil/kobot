@@ -207,7 +207,7 @@ class ConversationService(
                 is StaticExpectedValues -> {
                     log.trace("Got static values: {}", expectedValues)
                     if (!expectedValues.values.map { it.toString() }.contains(input))
-                        return InputCheck(false, expectedValues.onMismatch, expectedValues.values)
+                        return InputCheck(false, state.onMismatch, expectedValues.values)
                 }
                 is SessionExpectedValues -> {
                     val key = expectedValues.key
@@ -219,7 +219,7 @@ class ConversationService(
                     // do the actual check
                     val values = (context[key] as List<*>).map { it.toString() }
                     if (!values.contains(input))
-                        return InputCheck(false, expectedValues.onMismatch, values.map { it.toString() })
+                        return InputCheck(false, state.onMismatch, values.map { it.toString() })
                 }
                 else -> log.trace("Expected values is: {}. Unhandled for now", expectedValues::class.simpleName)
             }

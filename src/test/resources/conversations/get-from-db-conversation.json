@@ -19,10 +19,10 @@
       "id": "show-retrieved",
       "type": "wait-for-input",
       "expected-type": "string",
+      "on-mismatch": "Not a valid option! Try again",
       "expected-values": {
         "type": "session",
-        "key": "db-data",
-        "on-mismatch": "Not a valid option! Try again"
+        "key": "db-data"
       },
       "session-field": "choice"
     },

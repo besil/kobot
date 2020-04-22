@@ -36,9 +36,9 @@ Try with this:
       "id":  "wait-input",
       "type":  "wait-for-input",
       "expected-type": "string",
+      "on-mismatch": "Choice not recognized. Please, pick one of the following only",
       "expected-values": {
         "type": "static",
-        "on-mismatch": "Choice not recognized. Please, pick one of the following only",
         "values": ["hello", "world"]
       },
       "session-field": "customer-key"
@@ -50,9 +50,9 @@ Try with this:
       "id":  "get-answer",
       "type":  "wait-for-input",
       "expected-type": "string",
+      "on-mismatch": "nah, that wasn't a valid option",
       "expected-values": {
         "type": "static",
-        "on-mismatch": "nah, that wasn't a valid option",
         "values": ["yes", "no"]
       }
     },

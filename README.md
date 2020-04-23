@@ -297,7 +297,7 @@ bash scripts/build-docker.sh
 bash scripts/run-docker.sh
 ``` 
 
-You can access H2 database on [http://localhost:8080/h2-console]
+You can access H2 database on [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
 
 #### License
 Apache Open Source

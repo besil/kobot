@@ -4,11 +4,14 @@ bots using only a simple descriptive and human-readable configuration
 
 * [Quickstart](https://github.com/besil/kobot#quickstart-guide)
 * [User guide](https://github.com/besil/kobot#user-guide)
-    * [State and relationships](https://github.com/besil/kobot#quickstart-guide)
-    * [Session data]
-    * [State types]
-        * [start/end]
-        * [send-mex]
+    * [Configuration](https://github.com/besil/kobot#configuration)
+    * [Kobot conversation](https://github.com/besil/kobot#kobot-conversation)
+    * [Session data](https://github.com/besil/kobot#session-data)
+    * [State types](https://github.com/besil/kobot#state-types)
+        * [start/end](https://github.com/besil/kobot#startend-state)
+        * [send-mex](https://github.com/besil/kobot#send-mex)
+        * [wait-for-input](https://github.com/besil/kobot#wait-for-input)
+        * [jdbc-read](https://github.com/besil/kobot#jdbc-read)
 * [Developer guide](https://github.com/besil/kobot#developer-guide)
 
 ## Quickstart guide
@@ -99,28 +102,53 @@ the actual conversation.
 You can see some examples of conversation under the 
 [conversations](https://github.com/besil/kobot/tree/master/src/test/resources/conversations) folder.
 
-### Kobot state
+### Configuration
+In order to use Kobot, you have to create a:
+```text
+application.properties
+conversation.json
+```
+inside **config** folder where you run the jar.
+
+The **application.properties** contains application specific properties, such as database connection.
+In order to configure it, use the following as example:
+```properties
+logging.level.root=INFO
+logging.level.org.springframework=INFO
+logging.level.org.telegram=INFO
+logging.level.cloud.bernardinello.kobot=TRACE
+
+bot.name=<telegram bot name>
+bot.token=<telegram bot token>
+conversation.path=config/conversation.json
+
+spring.datasource.url=jdbc:h2:mem:store
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=h2
+spring.datasource.password=h2
+```
+
+### Kobot conversation
 Every state must have a unique custom *id* property and a *type* properties.
 
 There are different types, more will be developed:
   * [*start*](https://github.com/besil/kobot#startend-state) or [*end*](https://github.com/besil/kobot#startend-state), which indicate the beginning and the end of the conversation
-  * [*send-mex*]()
-  * [*wait-for-input*]()
-  * [*jdbc-read*]()
+  * [*send-mex*](https://github.com/besil/kobot#send-mex)
+  * [*wait-for-input*](https://github.com/besil/kobot#wait-for-input)
+  * [*jdbc-read*](https://github.com/besil/kobot#jdbc-read)
 
 All states must be connected in a path from the start node to the end node.
 
-#### Session data
+### Session data
 Each state can access **session data**, which are user-specific data saved during the conversation.
 For example, you can save the input from user in the session and use it later to query a db or invoking an API.
 Session data can be accessed using **!{session-key}** special characters.
 
 A special session key provided by kobot is the **!{chatId}**, which indicates the user chat unique identifier.
 
-
-
 Here is the list of current implemented state types:
 
+### State types
 #### start/end State
 ```json
 {"id":"start", "type": "start"}
@@ -137,13 +165,92 @@ Every conversation must have them and no other states can be before the start st
 {"id":"send", "type": "send-mex", "message": "Welcome! Pick an option"}
 ```
 ```json
-{"id":"send", "type": "send-mex", "message": "Welcome! Pick an option"}
+{"id":"send", "type": "send-mex", "message": "Hi! Your chat is !{chatId}"}
 ```
 
+This state makes kobot send the *message* to the user.
+You can use **session-data** for dynamic message: you can use the **!{key}**, but the key must be present in session.
+**chatId** is a special key, provided by the framework and indicates the unique user chat identifier.
+
+#### wait-for-input
+```json
+{
+  "id": "wait-input",
+  "type": "wait-for-input",
+  "expected-type": "string",
+  "on-mismatch": "Choice not recognized. Please, pick one of the following only",
+  "expected-values": {
+    "type": "static",
+    "values": [ "hello", "world"]
+  }
+}
+```
+```json
+{
+  "id": "show-retrieved",
+  "type": "wait-for-input",
+  "expected-type": "string",
+  "on-mismatch": "Not a valid option! Try again",
+  "expected-values": {
+    "type": "session",
+    "key": "db-data"
+  },
+  "session-field": "choice"
+}
+```
+**wait-for-input** requires a *expected-type* field: this can be
+* string
+* number
+
+*on-mismatch* is the message provided when the input doesn't match the expected values.
+
+*session-field* is an optional key.
+If provided, the input will be stored in session at the provided variable name
+
+*expected-values* type can be :
+* static
+    * requires an array of values, which will be provided as input choices to the user and matched against given input
+* session
+    * requires a key, which session-values will be provided as input choices to the user
+
+#### jdbc-read  
+```json
+{
+  "id": "get-content",
+  "type": "jdbc-read",
+  "query": "select bar from foobar where foo=!{choice}",
+  "session-field": "db-data"
+}
+```
+this state requires a mandatory *query* and *session-field*.
+In order to perform queries, you have to [configure the database access](https://github.com/besil/kobot#configuration)
+
+The query is a SQL query, which can use session data in order to parametrize the query.
+The query must be a plain select and must fetch only a single column.
+
+If multiple results will be fetched, data will be stored in a list.
+If a single value is fetched, it will provided as a scalar value.
+
+*session-field* indicates the key of the session where data will be stored.
   
 
 ### Relationships
+Bot relationships defines transitions between states.
+A relationships defines the link between two states
+```json
+{"from": "s1", "to": "s2"}
+```
 
+In a wait-for-input state, you can go to different states based on the input from user: imagine a Yes/No situation.
+For relationsips from a wait-for-input states with static expected-values, you have to specify
+the message on the relationship. For example:   
+```
+    {"from" : "wait-input", "to":  "ciao", "on-input":  ["hello"]},
+    {"from" : "wait-input", "to":  "mondo", "on-input":  ["world"]},
+```
+In this case, when in *wait-input* state and after receiving input *hello*, kobot will go to *ciao* state.
+If *world* is received, the *mondo* state will be reached.
+Please note that on-input values must exactly match the static expected-values provided in the state definition.
 
 ## Developer guide
 

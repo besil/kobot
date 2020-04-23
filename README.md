@@ -8,8 +8,8 @@ bots using only a simple descriptive and human-readable configuration
 
 ## Quickstart guide
 ### Prerequisites
-* Download or build the jar (kobot-1.0-SNAPSHOT-exec.jar)
-* Have a telegram bot token and name (talk to Botfather in order to get it)
+* [Download](https://github.com/besil/kobot/releases/) or build the jar
+* Have a telegram bot token and name ([telegram docs](https://core.telegram.org/bots))
 * Have Java 8+ installed
 
 ### Define the configuration
@@ -87,20 +87,38 @@ java -jar kobot.jar
 Now go to telegram and enjoy your first conversation with the bot!
 
 ## User guide
-A conversation description is a simple json with two keys: *states* and *relationships*.
+A kobot conversation is represented as a simple json with two keys: *states* and *relationships*.
 
 A *state* defines an action the bot will perform, while the *relationships* connect the actions together, forming
 the actual conversation.
 You can see some examples of conversation under the 
 [conversations](https://github.com/besil/kobot/tree/master/src/test/resources/conversations) folder.
 
-### States
-Every state must have a unique *id* property and a *type* properties.
-Types can be:
-  * *start* or *end*, which indicate the beginning and the end of the conversation
+### Kobot state
+Every state must have a unique custom *id* property and a *type* properties.
+
+There are different types, more will be developed:
+  * [*start*]() or [*end*](), which indicate the beginning and the end of the conversation
   * *send-mex*
   * *wait-for-input*
   * *jdbc-read*
+
+Each state can access **session data**, which are user-specific data saved during the conversation.
+For example, you can save the input from user in the session and use it later to query a db or invoking an API.
+Session data can be accessed using **!{session-key}** special characters.
+
+All states must be connected in a path from the start node to the end node.
+
+Here is the list of current implemented state types:
+
+#### Start/End State
+```json
+{"id":"start", "type": "start"}
+```
+```json
+{"id":"end", "type": "end"}
+```
+
   
 
 ### Relationships

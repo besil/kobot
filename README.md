@@ -245,13 +245,15 @@ In a wait-for-input state, you can go to different states based on the input fro
 
 For relationsips from a wait-for-input states with static expected-values, you have to specify
 the message on the relationship. For example:   
-```
+```json
 {"from" : "wait-input", "to":  "ciao", "on-input":  ["hello"]}
-{"from" : "wait-input", "to":  "mondo", "on-input":  ["world"]}
+```
+```json
+{"from" : "wait-input", "to":  "mondo", "on-input":  ["world, foo"]}
 ```
 In this case, when in *wait-input* state and after receiving input *hello*, kobot will go to *ciao* state.
 
-If *world* is received, the *mondo* state will be reached.
+If *world* or *foo* is received, the *mondo* state will be reached.
 Please note that on-input values must exactly match the static expected-values provided in the state definition.
 
 You will receive an error on startup in case

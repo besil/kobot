@@ -4,6 +4,11 @@ bots using only a simple descriptive and human-readable configuration
 
 * [Quickstart](https://github.com/besil/kobot#quickstart-guide)
 * [User guide](https://github.com/besil/kobot#user-guide)
+    * [State and relationships](https://github.com/besil/kobot#quickstart-guide)
+    * [Session data]
+    * [State types]
+        * [start/end]
+        * [send-mex]
 * [Developer guide](https://github.com/besil/kobot#developer-guide)
 
 ## Quickstart guide
@@ -98,25 +103,41 @@ You can see some examples of conversation under the
 Every state must have a unique custom *id* property and a *type* properties.
 
 There are different types, more will be developed:
-  * [*start*]() or [*end*](), which indicate the beginning and the end of the conversation
-  * *send-mex*
-  * *wait-for-input*
-  * *jdbc-read*
+  * [*start*](https://github.com/besil/kobot#startend-state) or [*end*](https://github.com/besil/kobot#startend-state), which indicate the beginning and the end of the conversation
+  * [*send-mex*]()
+  * [*wait-for-input*]()
+  * [*jdbc-read*]()
 
+All states must be connected in a path from the start node to the end node.
+
+#### Session data
 Each state can access **session data**, which are user-specific data saved during the conversation.
 For example, you can save the input from user in the session and use it later to query a db or invoking an API.
 Session data can be accessed using **!{session-key}** special characters.
 
-All states must be connected in a path from the start node to the end node.
+A special session key provided by kobot is the **!{chatId}**, which indicates the user chat unique identifier.
+
+
 
 Here is the list of current implemented state types:
 
-#### Start/End State
+#### start/end State
 ```json
 {"id":"start", "type": "start"}
 ```
 ```json
 {"id":"end", "type": "end"}
+```
+
+These states indicates the beginning and the end of a conversation.
+Every conversation must have them and no other states can be before the start state or after the end state.
+
+#### send-mex
+```json
+{"id":"send", "type": "send-mex", "message": "Welcome! Pick an option"}
+```
+```json
+{"id":"send", "type": "send-mex", "message": "Welcome! Pick an option"}
 ```
 
   

@@ -116,7 +116,7 @@ In order to configure it, use the following as example:
 logging.level.root=INFO
 logging.level.org.springframework=INFO
 logging.level.org.telegram=INFO
-logging.level.cloud.bernardinello.kobot=TRACE
+logging.level.cloud.bernardinello.kobot=INFO
 
 bot.name=<telegram bot name>
 bot.token=<telegram bot token>

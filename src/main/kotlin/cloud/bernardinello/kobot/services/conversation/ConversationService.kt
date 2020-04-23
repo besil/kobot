@@ -37,7 +37,7 @@ class ConversationService(
         val queryForList: List<Map<String, Any>> = jdbcTemplate.queryForList(sql)
         log.trace("Query list: {}", queryForList)
         val values = queryForList.flatMap { it.values }
-        accumulator.context[sessionKey] = values
+        accumulator.context[sessionKey] = if (values.size == 1) values.first() else values
         return accumulator
     }
 

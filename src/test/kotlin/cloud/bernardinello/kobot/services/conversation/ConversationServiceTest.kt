@@ -269,6 +269,50 @@ class ConversationServiceTest : StringSpec() {
             }
         }
 
+        "jdbc-read should set single value if one single element is retrieved" {
+            val jdbc = mockk<JdbcTemplate>()
+            val conversationService = ConversationService(config, jdbc, memoryService)
+            val state = JdbcReadState(
+                id = "read",
+                query = "select a from foo where chatid=!{chatId}",
+                sessionField = "result"
+            )
+
+            val rows: List<Map<String, Any>> = listOf(mapOf("a" to 1))
+            every { jdbc.queryForList("select a from foo where chatid=5") } returns rows
+
+            val sd = SessionData()
+            sd["chatId"] = 5
+            val acc = conversationService.visit(state, Accumulator(sd))
+            acc.context["result"] shouldBe 1
+
+            verify {
+                jdbc.queryForList("select a from foo where chatid=5")
+            }
+        }
+
+        "jdbc-read should handle empty results" {
+            val jdbc = mockk<JdbcTemplate>()
+            val conversationService = ConversationService(config, jdbc, memoryService)
+            val state = JdbcReadState(
+                id = "read",
+                query = "select a from foo where chatid=!{chatId}",
+                sessionField = "result"
+            )
+
+            val rows: List<Map<String, Any>> = listOf()
+            every { jdbc.queryForList("select a from foo where chatid=5") } returns rows
+
+            val sd = SessionData()
+            sd["chatId"] = 5
+            val acc = conversationService.visit(state, Accumulator(sd))
+            acc.context["result"] shouldBe listOf<Any>()
+
+            verify {
+                jdbc.queryForList("select a from foo where chatid=5")
+            }
+        }
+
         "jdbc-read should throw exception if session-key is not found" {
             val jdbc = mockk<JdbcTemplate>()
             val conversationService = ConversationService(config, jdbc, memoryService)

@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Paths
-import java.sql.Connection
-import java.sql.DriverManager
 import javax.sql.DataSource
 
 
@@ -18,20 +16,6 @@ class KobotConfig {
     companion object {
         val log = LoggerFactory.getLogger(KobotConfig::class.java)
     }
-
-    @Bean
-    fun databaseConfig(
-        @Value("\${db.username}") username: String,
-        @Value("\${db.password}") password: String,
-        @Value("\${db.url}") url: String
-    ): DatabaseConfig {
-        val conn: Connection = DriverManager.getConnection(url, username, password)
-        log.trace("Checking connection to: {}", url)
-        if (conn.isClosed)
-            log.warn("Connection to db is closed, please check your connection at $url")
-        return DatabaseConfig(username, password, url)
-    }
-
 
     @Bean
     fun botConfig(@Value("\${conversation.path}") conversationPath: String): BotConfig {

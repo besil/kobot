@@ -85,6 +85,24 @@ java -jar kobot.jar
 
 Now go to telegram and enjoy your first conversation with the bot!
 
+## User guide
+A conversation description is a simple json with two keys: *states* and *relationships*.
+
+A *state* defines an action the bot will perform, while the *relationships* connect the actions together, forming
+the actual conversation.
+You can see some examples of conversation under the [conversations]() folder.
+
+### States
+Every state must have a unique *id* property and a *type* properties.
+Types can be:
+  * *start* or *end*, which indicate the beginning and the end of the conversation
+  * *send-mex*
+  * *wait-for-input*
+  * *jdbc-read*
+  
+
+### Relationships
+
 
 ## Developer guide
 
@@ -98,11 +116,36 @@ mvn clean package
 ### Docker
 Put your *telegram.json* and *conversation.json* inside the **config** folder
 
+A tipical *application.properties* could be
+```properties
+logging.level.root=INFO
+logging.level.org.springframework=INFO
+logging.level.org.telegram=INFO
+logging.level.cloud.bernardinello.kobot=TRACE
+
+bot.name=<bot name>
+bot.token=<bot token>
+conversation.path=config/conversation.json
+
+#spring.jpa.hibernate.ddl-auto=update
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.datasource.url=jdbc:h2:mem:store
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=h2
+spring.datasource.password=h2
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.open-in-view=true
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console/
+```
+
 Then run
 ```shell script
 bash scripts/build-docker.sh
 bash scripts/run-docker.sh
 ``` 
+
+You can access H2 database on [http://localhost:8080/h2-console]
 
 #### License
 Apache Open Source

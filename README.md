@@ -1,9 +1,10 @@
 # Kobot - Conversational bot
+The goal of this project is to provide an open source framework for creating conversational 
+bots using only a simple descriptive and human-readable configuration
 
-## Goal
-The goal of this project is to provide an open source framework 
-for creating conversational bots using only a simple descriptive
-and human-readable configuration
+* [Quickstart](https://github.com/besil/kobot#quickstart-guide)
+* [User guide](https://github.com/besil/kobot#user-guide)
+* [Developer guide](https://github.com/besil/kobot#developer-guide)
 
 ## Quickstart guide
 ### Prerequisites
@@ -90,7 +91,8 @@ A conversation description is a simple json with two keys: *states* and *relatio
 
 A *state* defines an action the bot will perform, while the *relationships* connect the actions together, forming
 the actual conversation.
-You can see some examples of conversation under the [conversations]() folder.
+You can see some examples of conversation under the 
+[conversations](https://github.com/besil/kobot/tree/master/src/test/resources/conversations) folder.
 
 ### States
 Every state must have a unique *id* property and a *type* properties.

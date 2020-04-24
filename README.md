@@ -142,11 +142,13 @@ All states must be connected in a path from the start node to the end node.
 ### Session data
 Each state can access **session data**, which are user-specific data saved during the conversation.
 For example, you can save the input from user in the session and use it later to query a db or invoking an API.
-Session data can be accessed using **!{session-key}** special characters.
+Session data referring to key **session-key** can be accessed using 
+```
+!{session-key}
+```
+You will find examples in each state on how to access this information.
 
 A special session key provided by kobot is the **!{chatId}**, which indicates the user chat unique identifier.
-
-Here is the list of current implemented state types:
 
 ### State types
 #### start/end State

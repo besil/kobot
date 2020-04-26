@@ -105,10 +105,9 @@ class JdbcReadState(
             throw BotConfigException("Invalid session-field: '$sessionField' provided for state: '$id'")
         if (query == "")
             throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
+
         try {
             log.trace("Parsing query: $query")
-
-
             if (query.startsWith("select *"))
                 throw ConversationServiceException(
                     "Invalid query: '$query' provided for state: '$id' must have a single column return"
@@ -122,7 +121,6 @@ class JdbcReadState(
                     "Invalid query: '$query' provided for state: '$id' must have a single column return"
                 )
             }
-
         } catch (e: ClassCastException) {
             log.trace("Query is not a select!")
             throw BotConfigException("Invalid query: '$query' provided for state: '$id' is not a select")
@@ -149,15 +147,6 @@ class JdbcReadState(
         log.trace("{}", select.selectItems)
         log.trace("{}", select.selectItems.map { it.toString() })
         return select.selectItems.map { it.toString() }
-
-//        val columns = mutableListOf<String>()
-//        val tablesNamesFinder: TablesNamesFinder = object : TablesNamesFinder() {
-//            override fun visit(tableColumn: Column) {
-//                columns.add(tableColumn.columnName)
-//            }
-//        }
-//        tablesNamesFinder.getTableList(select)
-//        return columns
     }
 }
 
@@ -168,7 +157,10 @@ class JdbcWriteState(
     init {
         val s: Statement = try {
             log.trace("Parsing query: $query")
-            CCJSqlParserUtil.parse(query)
+            log.trace("Substitute session parameters")
+            val regex = """!\{(.*?)\}""".toRegex()
+            val sql = query.replace(regex, "?")
+            CCJSqlParserUtil.parse(sql)
         } catch (e: Exception) {
             throw BotConfigException("Invalid query: '$query' provided for state: '$id'")
         }

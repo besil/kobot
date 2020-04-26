@@ -1,0 +1,147 @@
+{
+  "states": [
+    {
+      "id": "start",
+      "type": "start"
+    },
+    {
+      "id": "get-db",
+      "type": "jdbc-read",
+      "query": "select foo from foobar",
+      "session-field": "db-data"
+    },
+    {
+      "id": "show-retrieved-1",
+      "type": "send-mex",
+      "message": "Database situation now"
+    },
+    {
+      "id": "show-retrieved-2",
+      "type": "send-mex",
+      "message": "!{db-data}"
+    },
+    {
+      "id": "ask-number",
+      "type": "send-mex",
+      "message": "Give me a number"
+    },
+    {
+      "id": "get-number",
+      "type": "wait-for-input",
+      "expected-type": "number",
+      "on-mismatch": "Not a valid option! Try again",
+      "expected-values": {
+        "type": "any"
+      },
+      "session-field": "foo"
+    },
+    {
+      "id": "ask-string",
+      "type": "send-mex",
+      "message": "Give me a string"
+    },
+    {
+      "id": "get-string",
+      "type": "wait-for-input",
+      "expected-type": "string",
+      "on-mismatch": "Not a valid option! Try again",
+      "expected-values": {
+        "type": "any"
+      },
+      "session-field": "bar"
+    },
+    {
+      "id": "show-choices",
+      "type": "send-mex",
+      "message": "You gave me: !{foo}, !{bar}.\nI will insert on db"
+    },
+    {
+      "id": "insert",
+      "type": "jdbc-write",
+      "query": "insert into foobar(foo, bar) values(!{foo}, '!{bar}')"
+    },
+    {
+      "id": "get-db-2",
+      "type": "jdbc-read",
+      "query": "select foo from foobar",
+      "session-field": "db-data"
+    },
+    {
+      "id": "show-retrieved-3",
+      "type": "send-mex",
+      "message": "Database situation now"
+    },
+    {
+      "id": "show-retrieved-4",
+      "type": "send-mex",
+      "message": "!{db-data}"
+    },
+    {
+      "id": "greet",
+      "type": "send-mex",
+      "message": "Bye!"
+    },
+    {
+      "id": "end",
+      "type": "end"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "start",
+      "to": "get-db"
+    },
+    {
+      "from": "get-db",
+      "to": "show-retrieved-1"
+    },
+    {
+      "from": "show-retrieved-1",
+      "to": "show-retrieved-2"
+    },
+    {
+      "from": "show-retrieved-2",
+      "to": "ask-number"
+    },
+    {
+      "from": "ask-number",
+      "to": "get-number"
+    },
+    {
+      "from": "get-number",
+      "to": "ask-string"
+    },
+    {
+      "from": "ask-string",
+      "to": "get-string"
+    },
+    {
+      "from": "get-string",
+      "to": "show-choices"
+    },
+    {
+      "from": "show-choices",
+      "to": "insert"
+    },
+    {
+      "from": "insert",
+      "to": "get-db-2"
+    },
+    {
+      "from": "get-db-2",
+      "to": "show-retrieved-3"
+    },
+    {
+      "from": "show-retrieved-3",
+      "to": "show-retrieved-4"
+    },
+    {
+      "from": "show-retrieved-4",
+      "to": "greet"
+    },
+    {
+      "from": "greet",
+      "to": "end"
+    }
+  ]
+}

@@ -3,6 +3,7 @@ package cloud.bernardinello.kobot.conversation
 import cloud.bernardinello.kobot.utils.KobotParser
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.slf4j.LoggerFactory
 
@@ -10,10 +11,6 @@ class JdbcWriteStateTest : StringSpec() {
     companion object {
         val log = LoggerFactory.getLogger(JdbcWriteStateTest::class.java)
     }
-
-//    override fun beforeTest(testCase: TestCase) {
-//        log.info("Running test: ${testCase.name}")
-//    }
 
     init {
         "A jdbc-write state can't have empty query" {
@@ -60,6 +57,19 @@ class JdbcWriteStateTest : StringSpec() {
                 |}""".trimMargin()
                 ) as JdbcWriteState
             }.message shouldContain "Invalid query: 'select * from foo group by asd' provided for state: 'read' is not an insert or update"
+        }
+
+        "a jdbc-write state can use session parameters" {
+            val write: JdbcWriteState = KobotParser.parse(
+                """{
+                | "id": "write",
+                | "type": "jdbc-write",
+                | "query": "insert into foobar(foo, bar) values (!{foo}, !{bar})"
+                |}""".trimMargin()
+                    .trimMargin()
+            )
+
+            write.query shouldBe "insert into foobar(foo, bar) values (!{foo}, !{bar})"
         }
     }
 

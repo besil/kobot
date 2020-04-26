@@ -5,8 +5,13 @@ import cloud.bernardinello.kobot.conversation.BotState
 data class MemoryData(val state: BotState, val sessionData: SessionData = SessionData())
 data class NoMemoryData(val chatId: Long)
 
-class SessionData {
-    val data: MutableMap<String, Any> = mutableMapOf()
+class SessionData(val data: MutableMap<String, Any> = mutableMapOf()) {
+
+//    constructor(m: Map<String, Any>) {
+//        data = m
+//    }
+
+//    val data: MutableMap<String, Any> = mutableMapOf()
 
     operator fun contains(key: String): Boolean {
         return key in data

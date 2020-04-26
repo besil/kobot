@@ -129,5 +129,18 @@ class JdbcReadStateTest : StringSpec() {
             state.extractSelectNames("select a,b from foo where chatId=?") shouldBe listOf("a", "b")
             state.extractSelectNames("select a,b from foo where chatId=:chatId") shouldBe listOf("a", "b")
         }
+
+        "jdbc-read should be able to use session parameters" {
+            val state: JdbcReadState = KobotParser.parse(
+                """{
+                | "id": "read",
+                | "type": "jdbc-read",
+                | "query": "select a from foobar where foo<>!{user-key} and bar=!{chatId}",
+                | "session-field": "foos"
+                |}""".trimMargin()
+            )
+
+            state.query shouldBe "select a from foobar where foo<>!{user-key} and bar=!{chatId}"
+        }
     }
 }

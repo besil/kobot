@@ -26,6 +26,19 @@ class ConversationService(
         val log = LoggerFactory.getLogger(ConversationService::class.java)
     }
 
+    fun visit(state: JdbcWriteState, accumulator: Accumulator): Accumulator {
+        log.trace("Visiting a jdbc-write state: {}", state.id)
+        val context = accumulator.context
+
+        val sessionKeys: List<String> = extractSessionKeys(state.query)
+        val sql = replaceSessionKeys(state.query, sessionKeys, context)
+
+        log.trace("Running sql: $sql")
+        jdbcTemplate.update(sql)
+
+        return accumulator
+    }
+
     fun visit(state: JdbcReadState, accumulator: Accumulator): Accumulator {
         log.trace("Visiting a jdbc-read state: {}", state.id)
         val context = accumulator.context
@@ -101,18 +114,28 @@ class ConversationService(
         return accumulator
     }
 
-    private fun replaceSessionKeys(mex: String, keys: List<String>, context: SessionData): String {
+    /**
+     *  Replace all the !{key} in s with value taken from context
+     *
+     *  @return the string with substitutions applied
+     *  @throws BotConfigException if all keys are not present in context
+     *
+     *  @param s: the string where to apply the substitution
+     *  @param keys: the list of keys to substitute
+     *  @param context: the SessionData holding the values to be substituted
+     */
+    fun replaceSessionKeys(s: String, keys: List<String>, context: SessionData): String {
         val missingSessionKeys = keys.filter { !context.contains(it) }.toList().sorted()
         if (missingSessionKeys.isNotEmpty()) {
             log.trace("Missing keys: {}", missingSessionKeys)
             throw ConversationServiceException("Session keys $missingSessionKeys not found in current context")
         }
 
-        var outputMex = mex
+        var sql = s
         keys.forEach {
-            outputMex = outputMex.replace("!{$it}", context[it].toString())
+            sql = sql.replace("!{$it}", context[it].toString())
         }
-        return outputMex
+        return sql
     }
 
     fun visit(visitable: BotState, accumulator: Accumulator): Accumulator {

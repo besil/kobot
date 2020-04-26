@@ -119,6 +119,20 @@ class ConversationServiceTest : StringSpec() {
             context.data.size shouldBe 0
         }
 
+        "visiting a start state should not change the accumulator" {
+            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val context = SessionData()
+            val acc = conversationService.visit(StartState("start"), Accumulator(context))
+            acc shouldBe Accumulator(context)
+        }
+
+        "visiting a end state should not change the accumulator" {
+            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val context = SessionData()
+            val acc = conversationService.visit(EndState("end"), Accumulator(context))
+            acc shouldBe Accumulator(context)
+        }
+
         "visiting a send state" {
             val conversationService = ConversationService(config, jdbcTemplate, memoryService)
             val states = listOf(
@@ -325,6 +339,28 @@ class ConversationServiceTest : StringSpec() {
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(sd))
             }.message shouldContain "Session keys [bar, foobar] not found in current context"
+        }
+
+        "jdbc-write should throw exception if session-key is not found" {
+            val jdbc = mockk<JdbcTemplate>()
+            val conversationService = ConversationService(config, jdbc, memoryService)
+            val state = JdbcWriteState(
+                id = "write",
+                query = "insert into foobar values(!{foo}, '!{bar}')"
+            )
+            val sd = SessionData()
+            shouldThrow<ConversationServiceException> {
+                conversationService.visit(state, Accumulator(sd))
+            }.message shouldContain "Session keys [bar, foo] not found in current context"
+
+            sd["foo"] = 1
+            sd["bar"] = "bar"
+            every { jdbc.update("insert into foobar values(1, 'bar')") } returns 1
+            conversationService.visit(state, Accumulator(sd))
+
+            verify {
+                jdbc.update("insert into foobar values(1, 'bar')")
+            }
         }
     }
 }

@@ -20,7 +20,8 @@ class BotConfig(val states: List<BotState>, val relationships: List<BotStateRela
 
     fun statesUntilWait(state: BotState, onInput: List<String>): List<BotState> {
         log.trace("Starting search from {} node with onInput: {}", state, onInput)
-        val node: BotNode = graph.vertexSet().find { it.state == state }!!
+        val node: BotNode = graph.vertexSet().find { it.state == state }
+            ?: throw BotConfigException("No state with id '${state.id}' found")
 
         val root: BotNode = when (state) {
             is WaitForInputState -> {

@@ -592,5 +592,38 @@ class BotConfigTest : StringSpec() {
             }.message shouldContain "Static input state 'wti' has no outgoing relationship on input [a, b]"
         }
 
+        "statesUntilWait should throw exception if state is not found" {
+            val config: BotConfig = KobotParser.parse(
+                """{
+                    |"states": [
+                    |   {"id": "start", "type": "start"},
+                    |   {
+                    |       "id": "wti", 
+                    |       "type": "wait-for-input", 
+                    |       "expected-type": "string",
+                    |       "on-mismatch": "error on input. choices are:",
+                    |       "expected-values": {
+                    |           "type": "static",
+                    |           "values": ["a", "b"]
+                    |       },
+                    |       "session-field": "s"
+                    |   },
+                    |   {"id": "sendfoo", "type": "send-mex", "message": "Hai inserito un foo: $[session.s]"},
+                    |   {"id": "sendbar", "type": "send-mex", "message": "Hai inserito un bar: $[session.s]"},
+                    |   {"id": "end", "type": "end"}
+                    |],
+                    |"relationships": [
+                    |   {"from": "start", "to": "wti"},
+                    |   {"from": "wti", "to": "sendfoo", "on-input": ["a"]},
+                    |   {"from": "wti", "to": "sendbar", "on-input": ["b"]},
+                    |   {"from": "sendfoo", "to": "end"},
+                    |   {"from": "sendbar", "to": "end"}
+                    |]
+                    |}""".trimMargin()
+            )
+            shouldThrow<BotConfigException> {
+                config.statesUntilWait(SendMexState("foo", "bar"), listOf())
+            }.message shouldContain "No state with id 'foo' found"
+        }
     }
 }

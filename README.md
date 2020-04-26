@@ -236,7 +236,30 @@ If multiple results will be fetched, data will be stored in a list.
 If a single value is fetched, it will provided as a scalar value.
 
 *session-field* indicates the key of the session where data will be stored.
-  
+
+#### jdbc-write
+```json
+{
+  "id": "insert",
+  "type": "jdbc-write",
+  "query": "insert into foobar(foo, bar) values(!{foo}, '!{bar}')"
+}
+```
+```json
+{
+  "id": "insert",
+  "type": "jdbc-write",
+  "query": "update foobar set foo=!{foo} where bar='!{bar}'"
+}
+```
+This state runs an insert or update against the configured db.
+
+You can use Session parameters, which are automatically decoded.
+
+The only required field (except for *id*) is the *query*, which is a SQL valid query.
+
+Be careful that only **insert** or **update** operations are accepted.
+If you use a *select*, an exception will be thrown at startup.
 
 ### Relationships
 Bot relationships defines transitions between states.

@@ -129,6 +129,8 @@ spring.datasource.password=h2
 ```
 
 ### Kobot conversation
+You can find some examples of conversations in the [conversations folder](https://github.com/besil/kobot/tree/master/src/test/resources/conversations)
+
 Every state must have a unique custom *id* property and a *type* properties.
 
 There are different types, more will be developed:

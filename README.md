@@ -12,6 +12,7 @@ bots using only a simple descriptive and human-readable configuration
         * [send-mex](https://github.com/besil/kobot#send-mex)
         * [wait-for-input](https://github.com/besil/kobot#wait-for-input)
         * [jdbc-read](https://github.com/besil/kobot#jdbc-read)
+        * [jdbc-write](https://github.com/besil/kobot#jdbc-write)
 * [Developer guide](https://github.com/besil/kobot#developer-guide)
 
 ## Quickstart guide

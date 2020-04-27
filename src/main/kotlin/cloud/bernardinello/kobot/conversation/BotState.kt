@@ -24,7 +24,8 @@ import org.slf4j.LoggerFactory
         JsonSubTypes.Type(name = "send-mex", value = SendMexState::class),
         JsonSubTypes.Type(name = "wait-for-input", value = WaitForInputState::class),
         JsonSubTypes.Type(name = "jdbc-read", value = JdbcReadState::class),
-        JsonSubTypes.Type(name = "jdbc-write", value = JdbcWriteState::class)
+        JsonSubTypes.Type(name = "jdbc-write", value = JdbcWriteState::class),
+        JsonSubTypes.Type(name = "http", value = HttpState::class)
     ]
 )
 abstract class BotState(val id: String, val type: String) {
@@ -176,5 +177,29 @@ class JdbcWriteState(
             }
         }
     }
-
 }
+
+class HttpRequestAuth
+
+class HttpRequestHeaders(
+    @JsonProperty("content-type") val contentType: String,
+    @JsonProperty("accept") val accept: String
+)
+
+class HttpRequestParam(val key: String, val value: String)
+
+class HttpRequestDetails(
+    val method: String,
+    val url: String,
+    @JsonProperty("query-params") val queryParams: List<HttpRequestParam>,
+    @JsonProperty("body-params") val bodyParams: List<HttpRequestParam>,
+    val headers: HttpRequestHeaders,
+    val auth: HttpRequestAuth
+)
+
+class HttpState(
+    id: String,
+    val request: HttpRequestDetails,
+    @JsonProperty("extraction-key") val extractionKey: String,
+    @JsonProperty("session-field") val sessionField: String
+) : BotState(id, "http")

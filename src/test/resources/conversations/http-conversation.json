@@ -1,0 +1,40 @@
+{
+  "states": [
+    {
+      "id": "start",
+      "type": "start"
+    },
+    {
+      "id": "greet",
+      "type": "send-mex",
+      "message": "Looking for a quote..."
+    },
+    {
+      "id": "get-quote",
+      "type": "http",
+      "request": {
+        "method": "get",
+        "url": "https://programming-quotes-api.herokuapp.com/quotes/random",
+        "query-params": [],
+        "body-params": [],
+        "headers": {
+          "content-type": "application/json",
+          "accept": "application/json"
+        },
+        "auth": {}
+      },
+      "extraction-key": "en",
+      "session-field": "quote"
+    },
+    {
+      "id": "send-quote",
+      "type": "send-mex",
+      "message": "!{quote}"
+    },
+    {
+      "id": "end",
+      "type": "end"
+    }
+  ],
+  "relationships": []
+}

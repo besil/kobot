@@ -182,8 +182,8 @@ class JdbcWriteState(
 class HttpRequestAuth
 
 class HttpRequestHeaders(
-    @JsonProperty("content-type") val contentType: String,
-    @JsonProperty("accept") val accept: String
+    @JsonProperty("content-type", required = false) val contentType: String = "",
+    @JsonProperty("accept", required = false) val accept: String = ""
 )
 
 class HttpRequestParam(val key: String, val value: String)
@@ -202,4 +202,11 @@ class HttpState(
     val request: HttpRequestDetails,
     @JsonProperty("extraction-key") val extractionKey: String,
     @JsonProperty("session-field") val sessionField: String
-) : BotState(id, "http")
+) : BotState(id, "http") {
+    init {
+        if (extractionKey.isEmpty())
+            throw BotConfigException("extraction-key can't be empty")
+        if (sessionField.isEmpty())
+            throw BotConfigException("session-field can't be empty")
+    }
+}

@@ -26,7 +26,7 @@ class HttpStateTest : StringSpec() {
                 | "extraction-key": "",
                 | "session-field": "bar"
                 |}""".trimMargin()
-                )
+                ) as HttpState
             }.message shouldContain "extraction-key can't be empty"
 
             val state: HttpState = KobotParser.parse(
@@ -44,7 +44,7 @@ class HttpStateTest : StringSpec() {
                 | "extraction-key": "foo.bar",
                 | "session-field": "bar"
                 |}""".trimMargin()
-            )
+            ) as HttpState
             state.extractionKey shouldBe "foo.bar"
         }
 
@@ -65,7 +65,7 @@ class HttpStateTest : StringSpec() {
                 | "extraction-key": "foo",
                 | "session-field": ""
                 |}""".trimMargin()
-                )
+                ) as HttpState
             }.message shouldContain "session-field can't be empty"
         }
 
@@ -86,7 +86,7 @@ class HttpStateTest : StringSpec() {
                 | "extraction-key": "foo",
                 | "session-field": "bar"
                 |}""".trimMargin()
-                )
+                ) as HttpState
             }.message shouldContain "http method can't be empty"
         }
 
@@ -107,7 +107,7 @@ class HttpStateTest : StringSpec() {
                 | "extraction-key": "foo",
                 | "session-field": "bar"
                 |}""".trimMargin()
-                )
+                ) as HttpState
             }.message shouldContain "'foo' is not a valid http method. Supported methods are: [get, post, put, delete]"
         }
 
@@ -128,7 +128,7 @@ class HttpStateTest : StringSpec() {
                 | "extraction-key": "foo",
                 | "session-field": "bar"
                 |}""".trimMargin()
-                )
+                ) as HttpState
             }.message shouldContain "url can't be empty"
         }
 
@@ -149,7 +149,7 @@ class HttpStateTest : StringSpec() {
                 | "extraction-key": "foo",
                 | "session-field": "bar"
                 |}""".trimMargin()
-                )
+                ) as HttpState
             }.message shouldContain "url 'ht:/www.google.com' is not a valid url"
 
             shouldThrow<BotConfigException> {
@@ -168,7 +168,7 @@ class HttpStateTest : StringSpec() {
                 | "extraction-key": "foo",
                 | "session-field": "bar"
                 |}""".trimMargin()
-                )
+                ) as HttpState
             }.message shouldContain "url 'http:/www.google.com' is not a valid url"
 
             shouldThrow<BotConfigException> {
@@ -187,7 +187,7 @@ class HttpStateTest : StringSpec() {
                 | "extraction-key": "foo",
                 | "session-field": "bar"
                 |}""".trimMargin()
-                )
+                ) as HttpState
             }.message shouldContain "url 'https:/www.google.com' is not a valid url"
 
 

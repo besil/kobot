@@ -5,6 +5,7 @@ import cloud.bernardinello.kobot.services.transport.TransportService
 import cloud.bernardinello.kobot.utils.OutputKobotMessage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
@@ -16,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
 
 @Service
+@ConditionalOnProperty(value = ["telegram.bot.name", "telegram.bot.token"])
 class TelegramService(
     @Autowired val config: TelegramConfig,
     @Lazy @Autowired val transportService: TransportService

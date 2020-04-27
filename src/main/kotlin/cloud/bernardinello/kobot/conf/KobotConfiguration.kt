@@ -12,9 +12,9 @@ import javax.sql.DataSource
 
 
 @Configuration
-class KobotConfig {
+class KobotConfiguration {
     companion object {
-        val log = LoggerFactory.getLogger(KobotConfig::class.java)
+        val log = LoggerFactory.getLogger(KobotConfiguration::class.java)
     }
 
     @Bean
@@ -22,10 +22,6 @@ class KobotConfig {
         log.info("Creating a bot config from conversation file: {}", conversationPath)
         return KobotParser.parse(Paths.get(conversationPath))
     }
-
-    @Bean
-    fun telegramConfig(@Value("\${bot.name}") name: String, @Value("\${bot.token}") token: String) =
-        TelegramConfig(name, token)
 
     @Bean
     fun jdbcTemplate(dataSource: DataSource): JdbcTemplate {

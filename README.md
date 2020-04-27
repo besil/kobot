@@ -29,9 +29,9 @@ Under the *config* dir, create two files:
 The *config/application.properties* contains bot telegram definition and the
 relative path to the conversation json descriptor
 ```properties
-bot.name=<your bot name>
-bot.token=<your bot token>
 conversation.path=config/conversation.json
+telegram.bot.name=<your bot name>
+telegram.bot.token=<your bot token>
 ```
 
 The *conversation.json* file contains your actual configuration.
@@ -119,9 +119,9 @@ logging.level.org.springframework=INFO
 logging.level.org.telegram=INFO
 logging.level.cloud.bernardinello.kobot=INFO
 
-bot.name=<telegram bot name>
-bot.token=<telegram bot token>
 conversation.path=config/conversation.json
+telegram.bot.name=<telegram bot name>
+telegram.bot.token=<telegram bot token>
 
 spring.datasource.url=jdbc:h2:mem:store
 spring.datasource.driverClassName=org.h2.Driver
@@ -305,9 +305,9 @@ logging.level.org.springframework=INFO
 logging.level.org.telegram=INFO
 logging.level.cloud.bernardinello.kobot=TRACE
 
-bot.name=<bot name>
-bot.token=<bot token>
 conversation.path=config/conversation.json
+telegram.bot.name=<bot name>
+telegram.bot.token=<bot token>
 
 #spring.jpa.hibernate.ddl-auto=update
 spring.jpa.hibernate.ddl-auto=create-drop

@@ -29,9 +29,9 @@ Under the *config* dir, create two files:
 The *config/application.properties* contains bot telegram definition and the
 relative path to the conversation json descriptor
 ```properties
-conversation.path=config/conversation.json
-telegram.bot.name=<your bot name>
-telegram.bot.token=<your bot token>
+kobot.conversation.path=config/conversation.json
+kobot.telegram.bot.name=<your bot name>
+kobot.telegram.bot.token=<your bot token>
 ```
 
 The *conversation.json* file contains your actual configuration.
@@ -114,9 +114,6 @@ inside a **config** folder where you run the jar.
 The **application.properties** contains application specific properties, such as database connection, logging level, etc
 In order to configure it, use the following as example:
 ```properties
-logging.level.root=INFO
-logging.level.org.springframework=INFO
-logging.level.org.telegram=INFO
 logging.level.cloud.bernardinello.kobot=INFO
 
 kobot.conversation.path=config/conversation.json

@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
 @Component
-@ConditionalOnProperty(value = ["telegram.bot.name", "telegram.bot.token"])
+@ConditionalOnProperty(value = ["kobot.telegram.bot.name", "kobot.telegram.bot.token"])
 class TelegramRunner(
     @Autowired val telegramService: TelegramService
 ) : CommandLineRunner {

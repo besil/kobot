@@ -17,7 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
 
 @Service
-@ConditionalOnProperty(value = ["telegram.bot.name", "telegram.bot.token"])
+@ConditionalOnProperty(value = ["kobot.telegram.bot.name", "kobot.telegram.bot.token"])
 class TelegramService(
     @Autowired val config: TelegramConfig,
     @Lazy @Autowired val transportService: TransportService

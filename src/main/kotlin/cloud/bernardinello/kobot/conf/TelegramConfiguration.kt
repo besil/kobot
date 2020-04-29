@@ -8,12 +8,12 @@ import org.springframework.context.annotation.Configuration
 data class TelegramConfig(val name: String, val token: String)
 
 @Configuration
-@ConditionalOnProperty(value = ["telegram.bot.name", "telegram.bot.token"])
+@ConditionalOnProperty(value = ["kobot.telegram.bot.name", "kobot.telegram.bot.token"])
 class TelegramConfiguration {
     @Bean
     fun telegramConfig(
-        @Value("\${telegram.bot.name}") name: String,
-        @Value("\${telegram.bot.token}") token: String
+        @Value("\${kobot.telegram.bot.name}") name: String,
+        @Value("\${kobot.telegram.bot.token}") token: String
     ) = TelegramConfig(name, token)
 }
 

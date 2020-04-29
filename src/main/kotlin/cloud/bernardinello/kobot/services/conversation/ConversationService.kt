@@ -1,6 +1,8 @@
 package cloud.bernardinello.kobot.services.conversation
 
 import cloud.bernardinello.kobot.conversation.*
+import cloud.bernardinello.kobot.services.database.SQLClientService
+import cloud.bernardinello.kobot.services.http.HttpClientService
 import cloud.bernardinello.kobot.services.memory.MemoryData
 import cloud.bernardinello.kobot.services.memory.MemoryService
 import cloud.bernardinello.kobot.services.memory.SessionData
@@ -11,7 +13,6 @@ import cloud.bernardinello.kobot.utils.OutputKobotMessage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import java.lang.reflect.Method
@@ -19,8 +20,10 @@ import java.lang.reflect.Method
 @Service
 class ConversationService(
     @Autowired val config: BotConfig,
-    @Autowired val jdbcTemplate: JdbcTemplate,
-    @Lazy @Autowired val memoryService: MemoryService
+//    @Autowired(required = false) val jdbcTemplate: JdbcTemplate?,
+    @Lazy @Autowired val memoryService: MemoryService,
+    @Autowired val sqlClient: SQLClientService,
+    @Autowired val httpClient: HttpClientService
 ) {
     companion object {
         val log = LoggerFactory.getLogger(ConversationService::class.java)
@@ -34,7 +37,7 @@ class ConversationService(
         val sql = replaceSessionKeys(state.query, sessionKeys, context)
 
         log.trace("Running sql: $sql")
-        jdbcTemplate.update(sql)
+        sqlClient.update(sql)
 
         return accumulator
     }
@@ -47,7 +50,7 @@ class ConversationService(
         val sessionKeys = extractSessionKeys(state.query)
         val sql = replaceSessionKeys(state.query, sessionKeys, context)
 
-        val queryForList: List<Map<String, Any>> = jdbcTemplate.queryForList(sql)
+        val queryForList: List<Map<String, Any>> = sqlClient.queryForList(sql)
         log.trace("Query list: {}", queryForList)
         val values = queryForList.flatMap { it.values }
         accumulator.context[sessionKey] = if (values.size == 1) values.first() else values

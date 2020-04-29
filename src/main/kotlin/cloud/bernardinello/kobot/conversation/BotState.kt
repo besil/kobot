@@ -14,6 +14,9 @@ import net.sf.jsqlparser.statement.select.Select
 import net.sf.jsqlparser.statement.update.Update
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.MalformedURLException
+import java.net.URISyntaxException
+import java.net.URL
 
 @JsonIgnoreProperties(ignoreUnknown = false)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -179,8 +182,6 @@ class JdbcWriteState(
     }
 }
 
-class HttpRequestAuth
-
 class HttpRequestHeaders(
     @JsonProperty("content-type", required = false) val contentType: String = "",
     @JsonProperty("accept", required = false) val accept: String = ""
@@ -193,9 +194,26 @@ class HttpRequestDetails(
     val url: String,
     @JsonProperty("query-params") val queryParams: List<HttpRequestParam>,
     @JsonProperty("body-params") val bodyParams: List<HttpRequestParam>,
-    val headers: HttpRequestHeaders,
-    val auth: HttpRequestAuth
-)
+    val headers: HttpRequestHeaders
+) {
+    init {
+        if (method.isEmpty())
+            throw BotConfigException("http method can't be empty")
+        if (method !in setOf("get", "GET", "post", "POST", "put", "PUT", "delete", "DELETE"))
+            throw BotConfigException("'$method' is not a valid http method. Supported methods are: [get, post, put, delete]")
+
+        if (url.isEmpty())
+            throw BotConfigException("url can't be empty")
+        try {
+            URL(url).toURI()
+        } catch (e: Exception) {
+            when (e) {
+                is MalformedURLException,
+                is URISyntaxException -> throw BotConfigException("url '$url' is not a valid url")
+            }
+        }
+    }
+}
 
 class HttpState(
     id: String,

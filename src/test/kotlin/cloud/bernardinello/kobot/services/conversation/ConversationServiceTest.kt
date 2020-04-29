@@ -1,6 +1,8 @@
 package cloud.bernardinello.kobot.services.conversation
 
 import cloud.bernardinello.kobot.conversation.*
+import cloud.bernardinello.kobot.services.database.SQLClientService
+import cloud.bernardinello.kobot.services.http.HttpClientService
 import cloud.bernardinello.kobot.services.memory.MemoryService
 import cloud.bernardinello.kobot.services.memory.SessionData
 import io.kotest.assertions.throwables.shouldThrow
@@ -11,7 +13,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.slf4j.LoggerFactory
-import org.springframework.jdbc.core.JdbcTemplate
 
 class ConversationServiceTest : StringSpec() {
 
@@ -22,16 +23,17 @@ class ConversationServiceTest : StringSpec() {
     init {
         val config = mockk<BotConfig>(relaxUnitFun = true)
         val memoryService = mockk<MemoryService>(relaxUnitFun = true)
-        val jdbcTemplate = mockk<JdbcTemplate>(relaxUnitFun = true)
+        val sqlClient = mockk<SQLClientService>(relaxUnitFun = true)
+        val httpClient = mockk<HttpClientService>(relaxUnitFun = true)
 
         "conversation service has utilities for extracting session keys from a string" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val keys = conversationService.extractSessionKeys("!{foo} must not be !{bar}. Except a !{foo-bar}!")
             keys shouldBe listOf("foo", "bar", "foo-bar")
         }
 
         "checkInput should return on-mismatch message when invalid input is provided" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val context = SessionData()
 
             val wfi = WaitForInputState(
@@ -52,7 +54,7 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "checkInput on session expected values should throw exception if key not present" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
 
             val wfi = WaitForInputState(
                 id = "wfi",
@@ -68,7 +70,7 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "checkInput on session expected values should throw exception if key is not a list of elements" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
 
             val wfi = WaitForInputState(
                 id = "wfi",
@@ -97,7 +99,7 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "update context should save variables in session fields" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val wfi = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
@@ -113,28 +115,28 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "update context on start-state should do nothing" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val context = SessionData()
             conversationService.updateContext(StartState("start"), context, "foo")
             context.data.size shouldBe 0
         }
 
         "visiting a start state should not change the accumulator" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val context = SessionData()
             val acc = conversationService.visit(StartState("start"), Accumulator(context))
             acc shouldBe Accumulator(context)
         }
 
         "visiting a end state should not change the accumulator" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val context = SessionData()
             val acc = conversationService.visit(EndState("end"), Accumulator(context))
             acc shouldBe Accumulator(context)
         }
 
         "visiting a send state" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val states = listOf(
                 SendMexState("send", "hello world"), SendMexState("2", "ciao mondo")
             )
@@ -146,7 +148,7 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "if send-mex references a non existing session element, an exception should be thrown" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = SendMexState("send", "hello !{world}")
 
             val context = SessionData()
@@ -163,7 +165,7 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "send-mex could reference multiple session keys" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = SendMexState("send", "!{greet} !{someone}")
 
             val context = SessionData()
@@ -184,7 +186,7 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "visiting a static wait-for-input state with no session" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val states = listOf(
                 WaitForInputState(
                     id = "wfi",
@@ -204,7 +206,7 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "visiting a session wait-for-input state with no key session should throw exception" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
@@ -219,7 +221,7 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "a session wait-for-input expected values must be a collection" {
-            val conversationService = ConversationService(config, jdbcTemplate, memoryService)
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = WaitForInputState(
                 id = "wfi",
                 expectedType = "string",
@@ -246,8 +248,8 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "visiting a jdbc-read state" {
-            val jdbc = mockk<JdbcTemplate>()
-            val conversationService = ConversationService(config, jdbc, memoryService)
+            val sqlClient = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo",
@@ -255,15 +257,15 @@ class ConversationServiceTest : StringSpec() {
             )
 
             val rows: List<Map<String, Any>> = listOf(mapOf("a" to 1), mapOf("a" to 2), mapOf("a" to 3))
-            every { jdbc.queryForList(state.query) } returns rows
+            every { sqlClient.queryForList(state.query) } returns rows
 
             val acc = conversationService.visit(state, Accumulator(SessionData()))
             acc.context["result"] shouldBe listOf(1, 2, 3)
         }
 
         "jdbc-read should be able to use session-data" {
-            val jdbc = mockk<JdbcTemplate>()
-            val conversationService = ConversationService(config, jdbc, memoryService)
+            val sqlClient = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo where chatid=!{chatId}",
@@ -271,7 +273,7 @@ class ConversationServiceTest : StringSpec() {
             )
 
             val rows: List<Map<String, Any>> = listOf(mapOf("a" to 1), mapOf("a" to 2), mapOf("a" to 3))
-            every { jdbc.queryForList("select a from foo where chatid=5") } returns rows
+            every { sqlClient.queryForList("select a from foo where chatid=5") } returns rows
 
             val sd = SessionData()
             sd["chatId"] = 5
@@ -279,13 +281,13 @@ class ConversationServiceTest : StringSpec() {
             acc.context["result"] shouldBe listOf(1, 2, 3)
 
             verify {
-                jdbc.queryForList("select a from foo where chatid=5")
+                sqlClient.queryForList("select a from foo where chatid=5")
             }
         }
 
         "jdbc-read should set single value if one single element is retrieved" {
-            val jdbc = mockk<JdbcTemplate>()
-            val conversationService = ConversationService(config, jdbc, memoryService)
+            val sqlClient = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo where chatid=!{chatId}",
@@ -293,7 +295,7 @@ class ConversationServiceTest : StringSpec() {
             )
 
             val rows: List<Map<String, Any>> = listOf(mapOf("a" to 1))
-            every { jdbc.queryForList("select a from foo where chatid=5") } returns rows
+            every { sqlClient.queryForList("select a from foo where chatid=5") } returns rows
 
             val sd = SessionData()
             sd["chatId"] = 5
@@ -301,13 +303,13 @@ class ConversationServiceTest : StringSpec() {
             acc.context["result"] shouldBe 1
 
             verify {
-                jdbc.queryForList("select a from foo where chatid=5")
+                sqlClient.queryForList("select a from foo where chatid=5")
             }
         }
 
         "jdbc-read should handle empty results" {
-            val jdbc = mockk<JdbcTemplate>()
-            val conversationService = ConversationService(config, jdbc, memoryService)
+            val sqlClient = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo where chatid=!{chatId}",
@@ -315,7 +317,7 @@ class ConversationServiceTest : StringSpec() {
             )
 
             val rows: List<Map<String, Any>> = listOf()
-            every { jdbc.queryForList("select a from foo where chatid=5") } returns rows
+            every { sqlClient.queryForList("select a from foo where chatid=5") } returns rows
 
             val sd = SessionData()
             sd["chatId"] = 5
@@ -323,13 +325,13 @@ class ConversationServiceTest : StringSpec() {
             acc.context["result"] shouldBe listOf<Any>()
 
             verify {
-                jdbc.queryForList("select a from foo where chatid=5")
+                sqlClient.queryForList("select a from foo where chatid=5")
             }
         }
 
         "jdbc-read should throw exception if session-key is not found" {
-            val jdbc = mockk<JdbcTemplate>()
-            val conversationService = ConversationService(config, jdbc, memoryService)
+            val sqlClient = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo where chatid=!{foobar} and foo=!{bar}",
@@ -342,8 +344,8 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "jdbc-write should throw exception if session-key is not found" {
-            val jdbc = mockk<JdbcTemplate>()
-            val conversationService = ConversationService(config, jdbc, memoryService)
+            val sqlClient = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
             val state = JdbcWriteState(
                 id = "write",
                 query = "insert into foobar values(!{foo}, '!{bar}')"
@@ -355,11 +357,11 @@ class ConversationServiceTest : StringSpec() {
 
             sd["foo"] = 1
             sd["bar"] = "bar"
-            every { jdbc.update("insert into foobar values(1, 'bar')") } returns 1
+            every { sqlClient.update("insert into foobar values(1, 'bar')") } returns 1
             conversationService.visit(state, Accumulator(sd))
 
             verify {
-                jdbc.update("insert into foobar values(1, 'bar')")
+                sqlClient.update("insert into foobar values(1, 'bar')")
             }
         }
     }

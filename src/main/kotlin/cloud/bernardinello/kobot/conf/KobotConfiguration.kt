@@ -6,9 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Paths
-import javax.sql.DataSource
 
 
 @Configuration
@@ -18,14 +16,8 @@ class KobotConfiguration {
     }
 
     @Bean
-    fun botConfig(@Value("\${conversation.path}") conversationPath: String): BotConfig {
-        log.info("Creating a bot config from conversation file: {}", conversationPath)
-        return KobotParser.parse(Paths.get(conversationPath))
+    fun botConfig(@Value("\${kobot.conversation.path}") kobotConversationPath: String): BotConfig {
+        log.info("Loading conversation file from: {}", kobotConversationPath)
+        return KobotParser.parse(Paths.get(kobotConversationPath))
     }
-
-    @Bean
-    fun jdbcTemplate(dataSource: DataSource): JdbcTemplate {
-        return JdbcTemplate(dataSource)
-    }
-
 }

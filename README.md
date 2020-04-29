@@ -109,9 +109,9 @@ In order to use Kobot, you have to create a:
 application.properties
 conversation.json
 ```
-inside **config** folder where you run the jar.
+inside a **config** folder where you run the jar.
 
-The **application.properties** contains application specific properties, such as database connection.
+The **application.properties** contains application specific properties, such as database connection, logging level, etc
 In order to configure it, use the following as example:
 ```properties
 logging.level.root=INFO
@@ -119,14 +119,16 @@ logging.level.org.springframework=INFO
 logging.level.org.telegram=INFO
 logging.level.cloud.bernardinello.kobot=INFO
 
-conversation.path=config/conversation.json
-telegram.bot.name=<telegram bot name>
-telegram.bot.token=<telegram bot token>
+kobot.conversation.path=config/conversation.json
+kobot.telegram.bot.name=<telegram bot name>
+kobot.telegram.bot.token=<telegram bot token>
 
-spring.datasource.url=jdbc:h2:mem:store
-spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.username=h2
-spring.datasource.password=h2
+kobot.http.client.enabled=true
+
+kobot.database.url=jdbc:h2:mem:store
+kobot.database.username=h2
+kobot.database.password=h2
+kobot.database.driverClassName=org.h2.Driver
 ```
 
 ### Kobot conversation
@@ -139,6 +141,7 @@ There are different types, more will be developed:
   * [*send-mex*](https://github.com/besil/kobot#send-mex)
   * [*wait-for-input*](https://github.com/besil/kobot#wait-for-input)
   * [*jdbc-read*](https://github.com/besil/kobot#jdbc-read)
+  * [*jdbc-write*](https://github.com/besil/kobot#jdbc-write)
 
 All states must be connected in a path from the start node to the end node.
 

@@ -20,13 +20,16 @@ import java.lang.reflect.Method
 @Service
 class ConversationService(
     @Autowired val config: BotConfig,
-//    @Autowired(required = false) val jdbcTemplate: JdbcTemplate?,
     @Lazy @Autowired val memoryService: MemoryService,
     @Autowired val sqlClient: SQLClientService,
     @Autowired val httpClient: HttpClientService
 ) {
     companion object {
         val log = LoggerFactory.getLogger(ConversationService::class.java)
+    }
+
+    fun visit(state: HttpState, accumulator: Accumulator): Accumulator {
+        return accumulator
     }
 
     fun visit(state: JdbcWriteState, accumulator: Accumulator): Accumulator {

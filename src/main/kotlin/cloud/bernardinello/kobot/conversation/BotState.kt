@@ -63,7 +63,7 @@ abstract class ExpectedValues(
     val type: String
 )
 
-data class StaticExpectedValues(val values: List<String>) :
+class StaticExpectedValues(val values: List<String>) :
     ExpectedValues(type = "static") {
     init {
         if (values.isEmpty())
@@ -73,7 +73,7 @@ data class StaticExpectedValues(val values: List<String>) :
 
 class AnyExpectedValues : ExpectedValues(type = "any")
 
-data class SessionExpectedValues(val key: String) :
+class SessionExpectedValues(val key: String) :
     ExpectedValues(type = "session") {
     init {
         if (key == "")

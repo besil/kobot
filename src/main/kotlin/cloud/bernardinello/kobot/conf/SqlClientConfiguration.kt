@@ -3,6 +3,8 @@ package cloud.bernardinello.kobot.conf
 import cloud.bernardinello.kobot.services.database.KobotSQLClient
 import cloud.bernardinello.kobot.services.database.MockedSQLClient
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -33,7 +35,7 @@ class SqlClientConfiguration {
         @Value("\${kobot.database.password}") password: String,
         @Value("\${kobot.database.driverClassName}") driverClassName: String
     ): DataSource {
-        log.debug("Preparing data source")
+        log.debug("Preparing kobot-datasource")
         val dataSourceBuilder = DataSourceBuilder.create()
         dataSourceBuilder.driverClassName(driverClassName)
         dataSourceBuilder.url(url)
@@ -44,13 +46,13 @@ class SqlClientConfiguration {
 
     @Bean("kobot-jdbc-template")
     @ConditionalOnBean(name = ["kobot-datasource"])
-    fun jdbcTemplate(dataSource: DataSource): JdbcTemplate {
+    fun jdbcTemplate(@Autowired @Qualifier("kobot-datasource") dataSource: DataSource): JdbcTemplate {
         return JdbcTemplate(dataSource)
     }
 
     @Bean
     @ConditionalOnBean(name = ["kobot-jdbc-template"])
-    fun kobotSQLClient(jdbcTemplate: JdbcTemplate): KobotSQLClient {
+    fun kobotSQLClient(@Autowired @Qualifier("kobot-jdbc-template") jdbcTemplate: JdbcTemplate): KobotSQLClient {
         log.info("Kobot SQL Client enabled")
         return KobotSQLClient(jdbcTemplate)
     }

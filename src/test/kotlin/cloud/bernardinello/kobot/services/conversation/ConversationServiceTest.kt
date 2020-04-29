@@ -364,5 +364,7 @@ class ConversationServiceTest : StringSpec() {
                 sqlClient.update("insert into foobar values(1, 'bar')")
             }
         }
+
+
     }
 }

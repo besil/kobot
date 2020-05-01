@@ -156,7 +156,7 @@ class ConversationServiceTest : StringSpec() {
                 conversationService.visit(state, Accumulator(context))
             }.message shouldContain "Session keys [world] not found in current context"
 
-            context.set("world", "foo")
+            context["world"] = "foo"
             val acc = conversationService.visit(state, Accumulator(context))
 
             acc.outputMessages shouldBe listOf("hello foo")
@@ -231,7 +231,7 @@ class ConversationServiceTest : StringSpec() {
                 )
             )
 
-            var context = SessionData()
+            val context = SessionData()
             context["foo"] = 1
             shouldThrow<ConversationServiceException> {
                 conversationService.visit(state, Accumulator(context))
@@ -248,8 +248,8 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "visiting a jdbc-read state" {
-            val sqlClient = mockk<SQLClientService>()
-            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
+            val sqlService = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlService, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo",
@@ -257,15 +257,15 @@ class ConversationServiceTest : StringSpec() {
             )
 
             val rows: List<Map<String, Any>> = listOf(mapOf("a" to 1), mapOf("a" to 2), mapOf("a" to 3))
-            every { sqlClient.queryForList(state.query) } returns rows
+            every { sqlService.queryForList(state.query) } returns rows
 
             val acc = conversationService.visit(state, Accumulator(SessionData()))
             acc.context["result"] shouldBe listOf(1, 2, 3)
         }
 
         "jdbc-read should be able to use session-data" {
-            val sqlClient = mockk<SQLClientService>()
-            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
+            val sqlService = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlService, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo where chatid=!{chatId}",
@@ -273,7 +273,7 @@ class ConversationServiceTest : StringSpec() {
             )
 
             val rows: List<Map<String, Any>> = listOf(mapOf("a" to 1), mapOf("a" to 2), mapOf("a" to 3))
-            every { sqlClient.queryForList("select a from foo where chatid=5") } returns rows
+            every { sqlService.queryForList("select a from foo where chatid=5") } returns rows
 
             val sd = SessionData()
             sd["chatId"] = 5
@@ -281,13 +281,13 @@ class ConversationServiceTest : StringSpec() {
             acc.context["result"] shouldBe listOf(1, 2, 3)
 
             verify {
-                sqlClient.queryForList("select a from foo where chatid=5")
+                sqlService.queryForList("select a from foo where chatid=5")
             }
         }
 
         "jdbc-read should set single value if one single element is retrieved" {
-            val sqlClient = mockk<SQLClientService>()
-            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
+            val sqlService = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlService, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo where chatid=!{chatId}",
@@ -295,7 +295,7 @@ class ConversationServiceTest : StringSpec() {
             )
 
             val rows: List<Map<String, Any>> = listOf(mapOf("a" to 1))
-            every { sqlClient.queryForList("select a from foo where chatid=5") } returns rows
+            every { sqlService.queryForList("select a from foo where chatid=5") } returns rows
 
             val sd = SessionData()
             sd["chatId"] = 5
@@ -303,13 +303,13 @@ class ConversationServiceTest : StringSpec() {
             acc.context["result"] shouldBe 1
 
             verify {
-                sqlClient.queryForList("select a from foo where chatid=5")
+                sqlService.queryForList("select a from foo where chatid=5")
             }
         }
 
         "jdbc-read should handle empty results" {
-            val sqlClient = mockk<SQLClientService>()
-            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
+            val sqlService = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlService, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo where chatid=!{chatId}",
@@ -317,7 +317,7 @@ class ConversationServiceTest : StringSpec() {
             )
 
             val rows: List<Map<String, Any>> = listOf()
-            every { sqlClient.queryForList("select a from foo where chatid=5") } returns rows
+            every { sqlService.queryForList("select a from foo where chatid=5") } returns rows
 
             val sd = SessionData()
             sd["chatId"] = 5
@@ -325,13 +325,13 @@ class ConversationServiceTest : StringSpec() {
             acc.context["result"] shouldBe listOf<Any>()
 
             verify {
-                sqlClient.queryForList("select a from foo where chatid=5")
+                sqlService.queryForList("select a from foo where chatid=5")
             }
         }
 
         "jdbc-read should throw exception if session-key is not found" {
-            val sqlClient = mockk<SQLClientService>()
-            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
+            val sqlService = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlService, httpClient)
             val state = JdbcReadState(
                 id = "read",
                 query = "select a from foo where chatid=!{foobar} and foo=!{bar}",
@@ -344,8 +344,8 @@ class ConversationServiceTest : StringSpec() {
         }
 
         "jdbc-write should throw exception if session-key is not found" {
-            val sqlClient = mockk<SQLClientService>()
-            val conversationService = ConversationService(config, memoryService, sqlClient, httpClient)
+            val sqlService = mockk<SQLClientService>()
+            val conversationService = ConversationService(config, memoryService, sqlService, httpClient)
             val state = JdbcWriteState(
                 id = "write",
                 query = "insert into foobar values(!{foo}, '!{bar}')"
@@ -357,11 +357,11 @@ class ConversationServiceTest : StringSpec() {
 
             sd["foo"] = 1
             sd["bar"] = "bar"
-            every { sqlClient.update("insert into foobar values(1, 'bar')") } returns 1
+            every { sqlService.update("insert into foobar values(1, 'bar')") } returns 1
             conversationService.visit(state, Accumulator(sd))
 
             verify {
-                sqlClient.update("insert into foobar values(1, 'bar')")
+                sqlService.update("insert into foobar values(1, 'bar')")
             }
         }
 

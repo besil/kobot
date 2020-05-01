@@ -192,9 +192,9 @@ class HttpRequestParam(val key: String, val value: String)
 class HttpRequestDetails(
     val method: String,
     val url: String,
-    @JsonProperty("query-params") val queryParams: List<HttpRequestParam>,
-    @JsonProperty("body-params") val bodyParams: List<HttpRequestParam>,
-    val headers: HttpRequestHeaders
+    @JsonProperty("query-params") val queryParams: List<HttpRequestParam> = listOf(),
+    @JsonProperty("body-params") val bodyParams: List<HttpRequestParam> = listOf(),
+    val headers: HttpRequestHeaders = HttpRequestHeaders()
 ) {
     init {
         if (method.isEmpty())

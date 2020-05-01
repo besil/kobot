@@ -45,14 +45,14 @@ class RestTestConfiguration
     classes = [RestTestConfiguration::class]
 )
 @Import(HttpClientConfiguration::class)
-class RestTemplateTest @Autowired constructor(val bot: HttpClientService) {
+class RestTemplateTest @Autowired constructor(val http: HttpClientService) {
     companion object {
         val log = LoggerFactory.getLogger(RestTemplateTest::class.java)
     }
 
     @Test
-    fun `bot is not null`() {
-        Assertions.assertThat(bot).isNotNull
+    fun `http is not null`() {
+        Assertions.assertThat(http).isNotNull
     }
 
     @LocalServerPort

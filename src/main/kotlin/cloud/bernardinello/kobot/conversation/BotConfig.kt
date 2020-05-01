@@ -1,5 +1,6 @@
 package cloud.bernardinello.kobot.conversation
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.jgrapht.Graph
 import org.jgrapht.Graphs
 import org.jgrapht.alg.connectivity.ConnectivityInspector
@@ -16,6 +17,11 @@ class BotConfigException(message: String) : Exception(message)
 class BotConfig(val states: List<BotState>, val relationships: List<BotStateRelationship>) {
     companion object {
         val log: Logger = LoggerFactory.getLogger(BotConfig::class.java)
+    }
+
+    override fun toString(): String {
+        val mapper = ObjectMapper()
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
     }
 
     fun statesUntilWait(state: BotState, onInput: List<String>): List<BotState> {

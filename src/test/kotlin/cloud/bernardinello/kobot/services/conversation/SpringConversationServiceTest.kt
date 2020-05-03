@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class SpringConversationServiceTestController {
-    @GetMapping("/api/foo")
+    @GetMapping("/api/random")
     fun random(): Map<String, Any> {
         return mapOf("hello" to "world", "list" to listOf(1, 2, 3))
     }
@@ -88,8 +88,8 @@ class SpringConversationServiceTest @Autowired constructor(val conversationServi
     }
 
     @Test
-    fun `test http request`(@Autowired config: BotConfig) {
-        val result = restTemplate.getForObject<Map<String, Any>>("http://localhost:$port/api/foo")
+    fun `test http request`() {
+        val result = restTemplate.getForObject<Map<String, Any>>("http://localhost:$port/api/random")
         assertThat(result!!["hello"]).isEqualTo("world")
     }
 

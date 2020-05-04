@@ -278,8 +278,8 @@ If you use a *select*, an exception will be thrown at startup.
       "accept": "application/json"
     }
   },
-  "extraction-key": "en",
-  "session-field": "quote"
+  "extraction-key": "x.y.z",
+  "session-field": "session-field"
 }
 ```
 This state execute a HTTP get/post/put/delete request against a target endpoint.

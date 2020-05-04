@@ -327,25 +327,19 @@ Put your *telegram.json* and *conversation.json* inside the **config** folder
 
 A tipical *application.properties* could be
 ```properties
-logging.level.root=INFO
-logging.level.org.springframework=INFO
-logging.level.org.telegram=INFO
-logging.level.cloud.bernardinello.kobot=TRACE
+logging.level.cloud.bernardinello.kobot=INFO
 
-conversation.path=config/conversation.json
-telegram.bot.name=<bot name>
-telegram.bot.token=<bot token>
+kobot.conversation.path=config/conversation.json
 
-#spring.jpa.hibernate.ddl-auto=update
-spring.jpa.hibernate.ddl-auto=create-drop
-spring.datasource.url=jdbc:h2:mem:store
-spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.username=h2
-spring.datasource.password=h2
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-spring.jpa.open-in-view=true
-spring.h2.console.enabled=true
-spring.h2.console.path=/h2-console/
+kobot.telegram.bot.name=<bot name>
+kobot.telegram.bot.token=<bot token>
+
+kobot.http.client.enabled=true
+
+kobot.database.url=jdbc:h2:mem:store
+kobot.database.username=h2
+kobot.database.password=h2
+kobot.database.driverClassName=org.h2.Driver
 ```
 
 Then run

@@ -287,7 +287,13 @@ This state execute a HTTP get/post/put/delete request against a target endpoint.
 Result is parsed using the "extraction-key" field, which can be in the form "x.y.z": this is usefull 
 for parsing nested json object.
 
-Result is stored in "session-field" 
+Result is stored in "session-field"
+
+Remember to set 
+```properties
+kobot.http.client.enabled=true
+```
+in your configuration file, in order to enable the HTTP client
 
 ### Relationships
 Bot relationships defines transitions between states.

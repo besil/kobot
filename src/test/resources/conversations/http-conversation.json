@@ -20,8 +20,7 @@
         "headers": {
           "content-type": "application/json",
           "accept": "application/json"
-        },
-        "auth": {}
+        }
       },
       "extraction-key": "en",
       "session-field": "quote"
@@ -29,12 +28,38 @@
     {
       "id": "send-quote",
       "type": "send-mex",
-      "message": "!{quote}"
+      "message": "\"!{quote}\""
+    },
+    {
+      "id": "send-bye",
+      "type": "send-mex",
+      "message": "Bye!"
     },
     {
       "id": "end",
       "type": "end"
     }
   ],
-  "relationships": []
+  "relationships": [
+    {
+      "from": "start",
+      "to": "greet"
+    },
+    {
+      "from": "greet",
+      "to": "get-quote"
+    },
+    {
+      "from": "get-quote",
+      "to": "send-quote"
+    },
+    {
+      "from": "send-quote",
+      "to": "send-bye"
+    },
+    {
+      "from": "send-bye",
+      "to": "end"
+    }
+  ]
 }

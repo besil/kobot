@@ -205,7 +205,10 @@ class HttpRequestDetails(
         if (url.isEmpty())
             throw BotConfigException("url can't be empty")
         try {
-            URL(url).toURI()
+
+            val regex = """!\{(.*?)\}""".toRegex()
+            val checkUrl = url.replace(regex, "sessiondata")
+            URL(checkUrl).toURI()
         } catch (e: Exception) {
             when (e) {
                 is MalformedURLException,

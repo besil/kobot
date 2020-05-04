@@ -300,8 +300,81 @@ class HttpStateTest : StringSpec() {
                 | "session-field": "bar"
                 |}""".trimMargin()
             )
-            state.request.headers.contentType == "application/json"
-            state.request.headers.accept == "application/json"
+            state.request.headers.contentType shouldBe "application/json"
+            state.request.headers.accept shouldBe "application/json"
         }
+
+        "http state should include session keys in url" {
+            val state: HttpState = KobotParser.parse(
+                """{
+                | "id": "http",
+                | "type": "http",
+                | "request": {
+                |   "method": "get",
+                |   "url": "http://www.example.com/!{session-key}",
+                |   "query-params": [],
+                |   "body-params": [],
+                |   "headers": {
+                |       "content-type": "application/json",
+                |       "accept": "application/json"
+                |   }
+                | },
+                | "extraction-key": "foo",
+                | "session-field": "bar"
+                |}""".trimMargin()
+            )
+            state.request.url shouldBe "http://www.example.com/!{session-key}"
+        }
+
+        "http state should include session keys in query params" {
+            val state: HttpState = KobotParser.parse(
+                """{
+                | "id": "http",
+                | "type": "http",
+                | "request": {
+                |   "method": "get",
+                |   "url": "http://www.example.com/!{session-key}",
+                |   "query-params": [{
+                |       "key": "!{session-key}",
+                |       "value": "!{session-value}"
+                |   }],
+                |   "body-params": [],
+                |   "headers": {
+                |       "content-type": "application/json",
+                |       "accept": "application/json"
+                |   }
+                | },
+                | "extraction-key": "foo",
+                | "session-field": "bar"
+                |}""".trimMargin()
+            )
+            state.request.url shouldBe "http://www.example.com/!{session-key}"
+        }
+
+        "http state should include session keys in body params" {
+            val state: HttpState = KobotParser.parse(
+                """{
+                | "id": "http",
+                | "type": "http",
+                | "request": {
+                |   "method": "get",
+                |   "url": "http://www.example.com/!{session-key}",
+                |   "body-params": [{
+                |       "key": "!{session-key}",
+                |       "value": "!{session-value}"
+                |   }],
+                |   "query-params": [],
+                |   "headers": {
+                |       "content-type": "application/json",
+                |       "accept": "application/json"
+                |   }
+                | },
+                | "extraction-key": "foo",
+                | "session-field": "bar"
+                |}""".trimMargin()
+            )
+            state.request.url shouldBe "http://www.example.com/!{session-key}"
+        }
+
     }
 }

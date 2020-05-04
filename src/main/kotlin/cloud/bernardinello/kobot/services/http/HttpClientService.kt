@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.exchange
 import org.springframework.web.util.UriComponentsBuilder
 
 @Service
@@ -24,6 +25,7 @@ class KobotHTTPClient(@Autowired val client: RestTemplate) : HttpClientService {
     companion object {
         val log = LoggerFactory.getLogger(KobotHTTPClient::class.java)
     }
+
 
     override fun execute(request: HttpRequestDetails): ResponseEntity<Map<String, Any>> {
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
@@ -42,12 +44,21 @@ class KobotHTTPClient(@Autowired val client: RestTemplate) : HttpClientService {
         val url = builder.toUriString()
         val method = HttpMethod.valueOf(request.method.toUpperCase())
 
+        val answer: ResponseEntity<Map<String, Any>> = this.makeRequest(url, method, entity)
+        return answer
+    }
+
+    private inline fun <reified T, reified K> makeRequest(
+        url: String,
+        method: HttpMethod,
+        entity: HttpEntity<Map<T, K>>
+    ): ResponseEntity<Map<T, K>> {
         return client.exchange(
             url,
             method,
             entity,
-            Map::class.java
-        ) as ResponseEntity<Map<String, Any>>
+            Map::class
+        )
     }
 }
 

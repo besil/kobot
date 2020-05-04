@@ -182,14 +182,14 @@ class JdbcWriteState(
     }
 }
 
-class HttpRequestHeaders(
+data class HttpRequestHeaders(
     @JsonProperty("content-type", required = false) val contentType: String = "",
     @JsonProperty("accept", required = false) val accept: String = ""
 )
 
-class HttpRequestParam(val key: String, val value: String)
+data class HttpRequestParam(val key: String, val value: String)
 
-class HttpRequestDetails(
+data class HttpRequestDetails(
     val method: String,
     val url: String,
     @JsonProperty("query-params") val queryParams: List<HttpRequestParam> = listOf(),

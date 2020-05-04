@@ -29,6 +29,50 @@ class ConversationService(
     }
 
     fun visit(state: HttpState, accumulator: Accumulator): Accumulator {
+        val urlSessionKeys = extractSessionKeys(state.request.url)
+        val newUrl: String = replaceSessionKeys(state.request.url, urlSessionKeys, accumulator.context)
+
+        val newQueryParams = state.request.queryParams.map {
+            val reqParamSessionKeys = extractSessionKeys(it.value)
+            val newValue = replaceSessionKeys(it.value, reqParamSessionKeys, accumulator.context)
+            HttpRequestParam(it.key, newValue)
+        }
+
+        val newBodyParams = state.request.bodyParams.map {
+            val bodyParamSessionKeys = extractSessionKeys(it.value)
+            val newValue = replaceSessionKeys(it.value, bodyParamSessionKeys, accumulator.context)
+            HttpRequestParam(it.key, newValue)
+        }
+
+        val newHttpRequest = HttpRequestDetails(
+            method = state.request.method,
+            url = newUrl,
+            queryParams = newQueryParams,
+            bodyParams = newBodyParams,
+            headers = state.request.headers
+        )
+
+        val response = httpClient.execute(newHttpRequest)
+        val body: Map<String, Any> = response.body!!
+
+        val keys: List<String> = state.extractionKey.split("\\.".toRegex())
+        var result: Any = body
+        keys.forEach {
+            val m = result as Map<String, Any>
+            if (!m.containsKey(it))
+                throw ConversationServiceException("Extraction key [${state.extractionKey}] not found in response")
+            result = m[it]!!
+        }
+
+        if (result is Collection<*>)
+            log.warn("Result is a collection!")
+
+        if (result is Collection<*>) {
+            val x: Collection<*> = result as Collection<*>
+            accumulator.context[state.sessionField] = if (x.size == 1) x.first()!! else x
+        } else
+            accumulator.context[state.sessionField] = result
+
         return accumulator
     }
 

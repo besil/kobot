@@ -350,17 +350,18 @@ class ConversationServiceTest : StringSpec() {
             }
         }
 
-        "http should throw exception if session key is not found" {
-            val httpState = HttpState(
+        "http should throw exception if session key is not found in url" {
+            var httpState = HttpState(
                 id = "http",
                 request = HttpRequestDetails(
                     method = "get",
-                    url = "http://localhost:8080/api/!{context-id}"
+                    url = "http://localhost:8080/api/!{foo}"
                 ),
                 extractionKey = "foo.bar",
                 sessionField = "foo.bar"
             )
 
+            val sd = SessionData()
             every { httpClient.execute(httpState.request) } returns ResponseEntity(
                 mapOf(
                     "foo" to mapOf("bar" to 1)
@@ -369,9 +370,173 @@ class ConversationServiceTest : StringSpec() {
             )
 
             shouldThrow<ConversationServiceException> {
-                conversationService.visit(httpState, Accumulator(SessionData()))
-            }.message shouldContain "Session keys [context-id] not found"
+                conversationService.visit(httpState, Accumulator(sd))
+            }.message shouldContain "Session keys [foo] not found"
+
+//            sd["foo"] = "foo"
+//            val acc = conversationService.visit(httpState, Accumulator(sd))
+//            acc.context["foo.bar"] shouldBe 1
         }
+
+        "http should throw exception if multiple session keys are not found in url" {
+            var httpState = HttpState(
+                id = "http",
+                request = HttpRequestDetails(
+                    method = "get",
+                    url = "http://localhost:8080/api/!{foo}/!{bar}"
+                ),
+                extractionKey = "foo.bar",
+                sessionField = "foo.bar"
+            )
+
+            val sd = SessionData()
+            every { httpClient.execute(httpState.request) } returns ResponseEntity(
+                mapOf(
+                    "foo" to mapOf("bar" to 1)
+                ),
+                HttpStatus.OK
+            )
+
+            shouldThrow<ConversationServiceException> {
+                conversationService.visit(httpState, Accumulator(sd))
+            }.message shouldContain "Session keys [bar, foo] not found"
+
+//            sd["foo"] = "foo"
+//            sd["bar"] = "bar"
+//            val acc = conversationService.visit(httpState, Accumulator(sd))
+//            acc.context["foo.bar"] shouldBe 1
+        }
+
+
+        "http should throw exception if session key is not found also for query params" {
+            var httpState = HttpState(
+                id = "http",
+                request = HttpRequestDetails(
+                    method = "get",
+                    url = "http://localhost:8080/api",
+                    queryParams = listOf(
+                        HttpRequestParam("foo", "!{context-id}")
+                    )
+                ),
+                extractionKey = "foo.bar",
+                sessionField = "foo.bar"
+            )
+
+            val sd = SessionData()
+            every { httpClient.execute(httpState.request) } returns ResponseEntity(
+                mapOf(
+                    "foo" to mapOf("bar" to 1)
+                ),
+                HttpStatus.OK
+            )
+
+            shouldThrow<ConversationServiceException> {
+                conversationService.visit(httpState, Accumulator(sd))
+            }.message shouldContain "Session keys [context-id] not found"
+
+//            sd["context-id"] = "bar"
+//            val acc = conversationService.visit(httpState, Accumulator(sd))
+//            acc.context["foo.bar"] shouldBe 1
+        }
+
+        "http should throw exception if session key is not found also for body params!" {
+            var httpState = HttpState(
+                id = "http",
+                request = HttpRequestDetails(
+                    method = "get",
+                    url = "http://localhost:8080/api",
+                    bodyParams = listOf(
+                        HttpRequestParam("foo", "!{context-id}")
+                    )
+                ),
+                extractionKey = "foo.bar",
+                sessionField = "foo.bar"
+            )
+
+            val sd = SessionData()
+            every { httpClient.execute(httpState.request) } returns ResponseEntity(
+                mapOf(
+                    "foo" to mapOf("bar" to 1)
+                ),
+                HttpStatus.OK
+            )
+
+            shouldThrow<ConversationServiceException> {
+                conversationService.visit(httpState, Accumulator(sd))
+            }.message shouldContain "Session keys [context-id] not found"
+
+//            sd["context-id"] = "bar"
+//            val acc = conversationService.visit(httpState, Accumulator(sd))
+//            acc.context["foo.bar"] shouldBe 1
+        }
+
+        "http should set single value if one single element is retrieved" {
+            val httpState = HttpState(
+                id = "http",
+                request = HttpRequestDetails(
+                    method = "get",
+                    url = "http://localhost:8080/api"
+                ),
+                extractionKey = "foo.bar",
+                sessionField = "session-key"
+            )
+
+            every { httpClient.execute(httpState.request) } returns ResponseEntity(
+                mapOf(
+                    "foo" to mapOf("bar" to listOf(1))
+                ),
+                HttpStatus.OK
+            )
+
+            val acc = conversationService.visit(httpState, Accumulator(SessionData()))
+            acc.context["session-key"] shouldBe 1
+        }
+
+        "http should handle list values" {
+            val httpState = HttpState(
+                id = "http",
+                request = HttpRequestDetails(
+                    method = "get",
+                    url = "http://localhost:8080/api"
+                ),
+                extractionKey = "foo.bar",
+                sessionField = "session-key"
+            )
+
+            every { httpClient.execute(httpState.request) } returns ResponseEntity(
+                mapOf(
+                    "foo" to mapOf("bar" to listOf(1, 2, 3))
+                ),
+                HttpStatus.OK
+            )
+
+            val acc = conversationService.visit(httpState, Accumulator(SessionData()))
+            acc.context["session-key"] shouldBe listOf(1, 2, 3)
+        }
+
+        "http should throw exception if extraction key is not found" {
+            val httpState = HttpState(
+                id = "http",
+                request = HttpRequestDetails(
+                    method = "get",
+                    url = "http://localhost:8080/api"
+                ),
+                extractionKey = "foo.bar",
+                sessionField = "foo.bar"
+            )
+
+            every { httpClient.execute(httpState.request) } returns ResponseEntity(
+                mapOf(
+                    "foo" to mapOf("asd" to 1)
+                ),
+                HttpStatus.OK
+            )
+
+            shouldThrow<ConversationServiceException> {
+                conversationService.visit(httpState, Accumulator(SessionData()))
+            }.message shouldContain "Extraction key [foo.bar] not found in response"
+        }
+
 
     }
 }

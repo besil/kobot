@@ -13,6 +13,7 @@ bots using only a simple descriptive and human-readable configuration
         * [wait-for-input](https://github.com/besil/kobot#wait-for-input)
         * [jdbc-read](https://github.com/besil/kobot#jdbc-read)
         * [jdbc-write](https://github.com/besil/kobot#jdbc-write)
+        * [http](https://github.com/besil/kobot#http)
 * [Developer guide](https://github.com/besil/kobot#developer-guide)
 
 ## Quickstart guide
@@ -261,6 +262,32 @@ The only required field (except for *id*) is the *query*, which is a SQL valid q
 
 Be careful that only **insert** or **update** operations are accepted.
 If you use a *select*, an exception will be thrown at startup.
+
+#### http
+```json
+{
+  "id": "get-quote",
+  "type": "http",
+  "request": {
+    "method": "get",
+    "url": "<your url>",
+    "query-params": [],
+    "body-params": [],
+    "headers": {
+      "content-type": "application/json",
+      "accept": "application/json"
+    }
+  },
+  "extraction-key": "en",
+  "session-field": "quote"
+}
+```
+This state execute a HTTP get/post/put/delete request against a target endpoint.
+
+Result is parsed using the "extraction-key" field, which can be in the form "x.y.z": this is usefull 
+for parsing nested json object.
+
+Result is stored in "session-field" 
 
 ### Relationships
 Bot relationships defines transitions between states.
